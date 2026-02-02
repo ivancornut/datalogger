@@ -20,6 +20,7 @@ We use a custome made PCB that integrates
 ## Software
 
 ### On the computer
+![Examples of interefacing GUIs](GUI_example.png)
 We use two GUIs on the computer:
 - one that generates the json configuration file for the datalogger
 - one that enables communication with the datalogger to update the clock and download files from the SD card
