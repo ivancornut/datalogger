@@ -1,6 +1,11 @@
 # Eco&Sols Datalogger
 This is a datalogger based on a Pi Pico and to be used with a wide range of sensors. 
 
+  * [Hardware](#hardware)
+  * [Software](#software)
+    + [On the computer](#on-the-computer)
+    + [On the datalogger](#on-the-datalogger)
+
 ## Hardware
 ![3D rendering of datalogger PCB](datalogger_pcb.png)
 We use a custome made PCB that integrates
