@@ -196,16 +196,22 @@ class CS616Dialog(SensorDialog):
         self.meas_entry = ttk.Entry(main_frame, width=10)
         self.meas_entry.grid(row=2, column=1, sticky=tk.W, pady=2)
         self.meas_entry.insert(0, "13")
+
+        # Enable Pin
+        ttk.Label(main_frame, text="Disable Pin:").grid(row=3, column=0, sticky=tk.W, pady=2)
+        self.enab_entry = ttk.Entry(main_frame, width=10)
+        self.enab_entry.grid(row=3, column=1, sticky=tk.W, pady=2)
+        self.enab_entry.insert(0, "9")
         
         # Timestep
-        ttk.Label(main_frame, text="Timestep (seconds):").grid(row=3, column=0, sticky=tk.W, pady=2)
+        ttk.Label(main_frame, text="Timestep (seconds):").grid(row=4, column=0, sticky=tk.W, pady=2)
         self.timestep_entry = ttk.Entry(main_frame, width=10)
-        self.timestep_entry.grid(row=3, column=1, sticky=tk.W, pady=2)
+        self.timestep_entry.grid(row=4, column=1, sticky=tk.W, pady=2)
         self.timestep_entry.insert(0, "10")
         
         # Buttons
         btn_frame = ttk.Frame(main_frame)
-        btn_frame.grid(row=4, column=0, columnspan=2, pady=10)
+        btn_frame.grid(row=5, column=0, columnspan=2, pady=10)
         ttk.Button(btn_frame, text="OK", command=self.ok).pack(side=tk.LEFT, padx=5)
         ttk.Button(btn_frame, text="Cancel", command=self.cancel).pack(side=tk.LEFT, padx=5)
     
@@ -217,7 +223,8 @@ class CS616Dialog(SensorDialog):
             
             ctrl_pins = [int(entry.get()) for entry in self.ctrl_entries]
             meas_pin = int(self.meas_entry.get())
-            
+            disab_Pin = int(self.enab_entry.get())
+
             timestep = int(self.timestep_entry.get())
             if timestep <= 0:
                 raise ValueError("Timestep must be positive")
@@ -227,7 +234,8 @@ class CS616Dialog(SensorDialog):
                 "params": {
                     "number": number,
                     "ctrlPins": ctrl_pins,
-                    "measPin": meas_pin
+                    "measPin": meas_pin,
+                    "disabPin":disab_Pin
                 },
                 "timestep": timestep
             }
@@ -426,7 +434,7 @@ class DataloggerConfigApp:
             if sensor_type == "dendro":
                 details = f"I2C:{params['I2C']}, Addr:{params['address']}, Names:{params['names']}"
             elif sensor_type == "CS616":
-                details = f"Num:{params['number']}, CtrlPins:{params['ctrlPins']}, MeasPin:{params['measPin']}"
+                details = f"Num:{params['number']}, CtrlPins:{params['ctrlPins']}, MeasPin:{params['measPin']}, DisabPin:{params['disabPin']}"
             elif sensor_type == "SHT45":
                 i2c = params.get('I2C', 0)
                 details = f"I2C:{i2c}, Name:{params['name']}"

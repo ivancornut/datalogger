@@ -29,9 +29,9 @@ class datalogger:
         self.battery_pin = ADC(26)
         self.voltage_drop_factor = 1/(22/(68+22))
         
-        self.battery_voltage = 12 # dummy
+        self.battery_voltage = 12 # dummy to start
         
-        self.usb_pin = Pin(24, Pin.IN)
+        self.usb_pin = Pin(24, Pin.IN) # identifies if Pi Pico is plugged into a computer
         
         self.column_names = ["Battery_voltage"] # initialise column names
         
@@ -125,61 +125,43 @@ class datalogger:
         # This function initialises the different sensors
         sensor_name = sensor["type"]
         
-        if sensor["default"]==1:
+        # !!! Campbell CS616 soil humidity probes !!!
+        if sensor_name == "TDR_CS616": 
+            p = sensor["params"]
+            return sensor_class.TDR_CS616(nb_cs616=p["number"], meas_pin=p["measPin"],ctrl_pins = p["ctrlPins"], disable_pin = p["disabPin"])
             
-            if sensor_name == "TDR_CS616":
-                return sensor_class.TDR_CS616()
-            
-            elif sensor_name =="dendrometer":
+        # !!! Fine Open dendros on ADS1115 !!!
+        elif sensor_name == "dendro": 
+            p = sensor["params"]
+            if p["I2C"] == 0:
                 if not self.i2c_0_used:
                     self.I2C_0_obj = I2C(0, sda=Pin(4), scl=Pin(5))
                     self.i2c_0_used = True
-                return sensor_class.dendrometer(self.I2C_0_obj)
-            
-            elif sensor_name == "SHT45":
+                return sensor_class.dendrometer(self.I2C_0_obj,on_pins=p["excite"],nb_dendros=p["number"],addr=p["address"], names=p["names"])
+            elif p["I2C"] == 1: 
+                if not self.i2c_1_used:
+                    self.I2C_1_obj = I2C(1, sda=Pin(2), scl=Pin(3))
+                    self.i2c_1_used = True
+                return sensor_class.dendrometer(self.I2C_1_obj,on_pins=p["excite"],nb_dendros=p["number"],addr=p["address"], names=p["names"])
+              
+        # !!! SHT45 !!!
+        elif sensor_name == "SHT45":
+            p = sensor["params"]
+            if p["I2C"] == 0:
                 if not self.i2c_0_used:
-                    self.I2C_0_obj = I2C(0, sda=Pin(0), scl=Pin(1))
+                    self.I2C_0_obj = I2C(0, sda=Pin(4), scl=Pin(5))
                     self.i2c_0_used = True
-                return sensor_class.temp_hum_sht45(self.I2C_0_obj)
-            
-            elif sensor_name == "temp_sensor":
-                return sensor_class.temp_DS18B20()
+                return sensor_class.temp_hum_sht45(self.I2C_0_obj, name = p["name"])
+            elif p["I2C"] == 1:
+                if not self.i2c_1_used:
+                    self.I2C_1_obj = I2C(1, sda=Pin(2), scl=Pin(3))
+                    self.i2c_1_used = True
+                return  sensor_class.temp_hum_sht45(self.I2C_1_obj, name = p["name"])
         
-        else: # if not default values for sensor
-            if sensor_name == "TDR_CS616": # Campbell soil humidity probes
-                p = sensor["params"]
-                return sensor_class.TDR_CS616(nb_cs616=p[0], meas_pin=p[1],
-                                              enable_pin=p[2],ctrl_pins = p[3])
-            
-            elif sensor_name == "dendrometer": # Fine Open dendros on ADS1115
-                p = sensor["params"]
-                if p["I2C"] == 0:
-                    if not self.i2c_0_used:
-                        self.I2C_0_obj = I2C(0, sda=Pin(4), scl=Pin(5))
-                        self.i2c_0_used = True
-                        return sensor_class.dendrometer(self.I2C_0_obj,on_pins=p["excite"],nb_dendros=p["number"],addr=p["address"], names=p["names"])
-                elif p["I2C"] == 1: 
-                    if not self.i2c_1_used:
-                        self.I2C_1_obj = I2C(1, sda=Pin(2), scl=Pin(3))
-                        self.i2c_1_used = True
-                        return sensor_class.dendrometer(self.I2C_1_obj,on_pins=p["excite"],nb_dendros=p["number"],addr=p["address"], names=p["names"])
-                        
-            elif sensor_name == "SHT45":
-                p = sensor["params"]
-                if p["I2C"] == 0:
-                    if not self.i2c_0_used:
-                        self.I2C_0_obj = I2C(0, sda=Pin(4), scl=Pin(5))
-                        self.i2c_0_used = True
-                    return sensor_class.temp_hum_sht45(self.I2C_0_obj, name = p["name"])
-                elif p["I2C"] == 1:
-                    if not self.i2c_1_used:
-                        self.I2C_1_obj = I2C(1, sda=Pin(2), scl=Pin(3))
-                        self.i2c_1_used = True
-                    return  sensor_class.temp_hum_sht45(self.I2C_1_obj, name = p["name"])
-            
-            elif sensor_name == "temp_sensor":
-                p = sensor["params"]
-                return sensor_class.temp_DS18B20(meas_pin=p[0],roms = p[1])
+        # !!! DS18B20 !!!    
+        elif sensor_name == "temp_sensor":
+            p = sensor["params"]
+            return sensor_class.temp_DS18B20(meas_pin=p[0],roms = p[1])
             
     
     def _write_file(self,sensor_values,test = False):
@@ -254,12 +236,13 @@ class datalogger:
             now = self.rtc.datetime() # check the datetime
             if self.usb_pin():
                 # if connected to usb do not sleep
+                # and instead read sensors every 4s
                 for sensor in self.sensor_objs:
-                    sensor.read_values(self.watchdog, self.led, debug = True)
+                    print(sensor.read_values(self.watchdog, self.led, debug = True))
                     self.watchdog.feed()
                     sleep(4)
             else:
-                if (now.minute%self.interval_minutes) == 0:
+                if (now.minute%self.interval_minutes) == 0: # check whether it is time to log
                     values = []
                     for sensor in self.sensor_objs:
                         values.append(sensor.read_values(self.watchdog,self.led))

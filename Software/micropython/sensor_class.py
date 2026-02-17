@@ -71,9 +71,12 @@ class temp_hum_sht45:
         return data_values
     
 class TDR_CS616:
-    def __init__(self, nb_cs616=8, meas_pin=11,enable_pin=9,ctrl_pins = [6,7,8]):
-        self.enable_Pin = Pin(enable_pin,Pin.OUT) # Pin to enable sensors with 5V
-        self.enable_Pin.value(0)
+    def __init__(self, nb_cs616=8, meas_pin=11,ctrl_pins = [6,7,8], disable_pin=9):
+        #self.enable_Pin = Pin(enable_pin,Pin.OUT) # Pin to enable sensors with 5V
+        #self.enable_Pin.value(0)
+        self.disable_Pin = Pin(enable_pin,Pin.OUT) # Pin to disable sensors with 5V
+        self.disable_Pin.value(1) # turn ON to disable
+        
         self.switch_control = CD4051.CD4051(ctrl_pins[0],ctrl_pins[1],ctrl_pins[2]) # control of the first CD4051 switch
         #self.signal_control = CD4051.CD4051(sig_ctrl_pins[0],sig_ctrl_pins[1],sig_ctrl_pins[2]) # control of the second CD4051 switch
         
@@ -135,14 +138,16 @@ class TDR_CS616:
         return VW
     
     def turn_off(self):
-        self.enable_Pin.value(0)
+        #self.enable_Pin.value(0)
+        self.disable_Pin.value(1)
         
     def read_values(self,watchdog,internal_led, debug = False):
         data_values = []
         
         for i in range(0,self.number):
             self.switch_control.set_output(i)
-            self.enable_Pin.value(1)
+            #self.enable_Pin.value(1)
+            self.disable_Pin.value(0)
             
             sleep(0.5) # just wait for it to turn on
             
@@ -158,7 +163,8 @@ class TDR_CS616:
                 value_2 = 999.9
                 print("Error: ",e)
             
-            self.enable_Pin.value(0)
+            self.disable_Pin.value(1)
+            #self.enable_Pin.value(0)
             
             data_values.append(value_1)
             data_values.append(value_2)
@@ -170,6 +176,7 @@ class TDR_CS616:
             internal_led.value(0)
         
         self.switch_control.set_output(0) # go back to first position to avoid pin getting stuck
+        self.disable_Pin.value(1)
         
         return data_values
 
@@ -198,21 +205,21 @@ class dendrometer:
             print("Error too many dendros on same ADC")
             
     def read_values(self,watchdog,internal_led, debug = False):
+        data_values = []
         try:
-            for i in self.excite_pins:
-                i.value(1)
-                data_values = []
+            for i in range(0,self.nb_dendros):
+                self.excite_pins[i].value(1)
                 sleep(0.05)
                 value1 = 0
                 value2 = 0
                 internal_led.value(1)
-                for i in range(0,10):
+                for u in range(0,10):
                     value1 = value1 + self.ads.read(1,0)/10
                     value2 = value2 + self.ads.read(1,1)/10
                     sleep(0.05)
                 internal_led.value(0)
                 sleep(0.05)
-                i.value(0)
+                self.excite_pins[i].value(0)
                 data_values.append(value1)
                 data_values.append(value2)
                 data_values.append(value2/value1)
@@ -223,10 +230,10 @@ class dendrometer:
             if self.nb_dendros == 2:
                 data_values = [999999,999999,999999,999999,999999,999999]
         
-        for n in self.excite_pins:
-            n.value(0) # make sure the activation pin is off
+        for n in range(0,self.nb_dendros):
+            self.excite_pins[n].value(0) # make sure the activation pin is off
         
         watchdog.feed() # feed the watchdog of the datalogger class
         internal_led.value(0)
-        
+        print(data_values)
         return data_values
