@@ -2,6 +2,8 @@
 This is a datalogger based on a Pi Pico and to be used with a wide range of sensors. 
 
   * [Hardware](#hardware)
+    + [Full size datalogger](#full-size-datalogger)
+    + [Micro sized datalogger](#micro-sized-datalogger)
   * [Software](#software)
     + [On the computer](#on-the-computer)
     + [On the datalogger](#on-the-datalogger)
