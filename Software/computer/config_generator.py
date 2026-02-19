@@ -292,10 +292,8 @@ class SHT45Dialog(SensorDialog):
             if timestep <= 0:
                 raise ValueError("Timestep must be positive")
             
-            # Build params - only include I2C if it's set to 1 (non-default)
             params = {"name": name}
-            if self.i2c_var.get() == 1:
-                params["I2C"] = 1
+            params["I2C"] = self.i2c_var.get()
             
             self.result = {
                 "type": "SHT45",
@@ -315,7 +313,7 @@ class DataloggerConfigApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Datalogger JSON Configuration Generator")
-        self.root.geometry("700x600")
+        self.root.geometry("800x600")
         
         self.sensors = []  # List to store sensor configurations
         
@@ -474,6 +472,7 @@ class DataloggerConfigApp:
             longitude = self.longitude_entry.get().strip()
         
         config = {
+            "Cowbell":True,
             "latitude": latitude,
             "longitude": longitude,
             "named_location": self.named_location_entry.get().strip(),

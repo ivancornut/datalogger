@@ -226,9 +226,12 @@ class dendrometer:
                 
         except Exception as e:
             print(e)
-            data_values = [999999,999999,999999]
             if self.nb_dendros == 2:
-                data_values = [999999,999999,999999,999999,999999,999999]
+                print(data_values)
+                for i in range(len(data_values),6):
+                    data_values.append(999999)
+            else:
+                data_values = [999999,999999,999999]
         
         for n in range(0,self.nb_dendros):
             self.excite_pins[n].value(0) # make sure the activation pin is off

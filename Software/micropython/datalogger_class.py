@@ -148,6 +148,8 @@ class datalogger:
         elif sensor_name == "SHT45":
             p = sensor["params"]
             if p["I2C"] == 0:
+                print(self.i2c_0_used)
+                print(self.i2c_0_used)
                 if not self.i2c_0_used:
                     self.I2C_0_obj = I2C(0, sda=Pin(4), scl=Pin(5))
                     self.i2c_0_used = True
