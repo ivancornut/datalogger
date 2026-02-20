@@ -3261,148 +3261,6 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Regulator_Switching:R-78E5.0-0.5"
-			(pin_names
-				(offset 0.254)
-			)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "U"
-				(at -3.81 3.175 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" "R-78E5.0-0.5"
-				(at 0 3.175 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(justify left)
-				)
-			)
-			(property "Footprint" "Converter_DCDC:Converter_DCDC_RECOM_R-78E-0.5_THT"
-				(at 1.27 -6.35 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-						(italic yes)
-					)
-					(justify left)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" "https://www.recom-power.com/pdf/Innoline/R-78Exx-0.5.pdf"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "500mA Step-Down DC/DC-Regulator, 7-28V input, 5V fixed Output Voltage, LM78xx replacement, -40°C to +85°C, SIP3"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_keywords" "dc-dc recom Step-Down DC/DC-Regulator"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_fp_filters" "Converter*DCDC*RECOM*R*78E*0.5*"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(symbol "R-78E5.0-0.5_0_1"
-				(rectangle
-					(start -5.08 1.905)
-					(end 5.08 -5.08)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type background)
-					)
-				)
-			)
-			(symbol "R-78E5.0-0.5_1_1"
-				(pin power_in line
-					(at -7.62 0 0)
-					(length 2.54)
-					(name "IN"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin power_in line
-					(at 0 -7.62 90)
-					(length 2.54)
-					(name "GND"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin power_out line
-					(at 7.62 0 180)
-					(length 2.54)
-					(name "OUT"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "Switch:SW_Wuerth_450301014042"
 			(pin_names
 				(offset 1)
@@ -4932,12 +4790,6 @@
 		(uuid "62fc9f9e-8fe6-48cd-bd55-05f051428d88")
 	)
 	(junction
-		(at 261.62 62.23)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "6544581c-c389-41f9-a4d8-376b017c7551")
-	)
-	(junction
 		(at 179.07 176.53)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -4954,12 +4806,6 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "80aa71b5-5f54-4682-9120-cc754d1ffe5d")
-	)
-	(junction
-		(at 248.92 52.07)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "8eae1406-ec64-4f3d-9a34-0ab8ad528c71")
 	)
 	(junction
 		(at 229.87 36.83)
@@ -4990,12 +4836,6 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "bd9447c3-d79f-4e2d-97fa-28fd229ee542")
-	)
-	(junction
-		(at 247.65 36.83)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "c926688b-674a-4713-8289-19ff111fac63")
 	)
 	(junction
 		(at 222.25 36.83)
@@ -5058,16 +4898,6 @@
 			(type default)
 		)
 		(uuid "004003c3-1987-4f71-ad4d-1c2572c1f794")
-	)
-	(wire
-		(pts
-			(xy 261.62 59.69) (xy 261.62 62.23)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "01d1be36-91e5-4097-bdb2-2c909a3ebb53")
 	)
 	(wire
 		(pts
@@ -5158,16 +4988,6 @@
 			(type default)
 		)
 		(uuid "11000416-4d7c-4255-9add-253e8bde575d")
-	)
-	(wire
-		(pts
-			(xy 248.92 52.07) (xy 252.73 52.07)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "12a272ce-8fa8-432a-b676-6fa1dd15a00f")
 	)
 	(wire
 		(pts
@@ -5511,7 +5331,7 @@
 	)
 	(wire
 		(pts
-			(xy 247.65 36.83) (xy 254 36.83)
+			(xy 236.22 36.83) (xy 254 36.83)
 		)
 		(stroke
 			(width 0)
@@ -5721,16 +5541,6 @@
 	)
 	(wire
 		(pts
-			(xy 273.05 59.69) (xy 273.05 62.23)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "56ef5d52-ddda-4467-8aa1-bdfa36af00c5")
-	)
-	(wire
-		(pts
 			(xy 99.06 92.71) (xy 99.06 151.13)
 		)
 		(stroke
@@ -5841,16 +5651,6 @@
 	)
 	(wire
 		(pts
-			(xy 261.62 62.23) (xy 261.62 63.5)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "653a6079-9201-4f80-8b00-2d71e15c67f7")
-	)
-	(wire
-		(pts
 			(xy 124.46 142.24) (xy 186.69 142.24)
 		)
 		(stroke
@@ -5858,16 +5658,6 @@
 			(type default)
 		)
 		(uuid "6579cde6-878b-445b-bb62-9f4049414350")
-	)
-	(wire
-		(pts
-			(xy 273.05 62.23) (xy 261.62 62.23)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "676717df-51fd-4e2c-a8ef-b9942265953e")
 	)
 	(wire
 		(pts
@@ -6431,16 +6221,6 @@
 	)
 	(wire
 		(pts
-			(xy 280.67 52.07) (xy 280.67 62.23)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b3d0f437-a640-45c8-b652-86003bbc92ed")
-	)
-	(wire
-		(pts
 			(xy 213.36 71.12) (xy 213.36 74.93)
 		)
 		(stroke
@@ -6558,16 +6338,6 @@
 			(type default)
 		)
 		(uuid "bd68804d-7caf-4827-b218-3acb2d135173")
-	)
-	(wire
-		(pts
-			(xy 260.35 52.07) (xy 265.43 52.07)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "bef3744a-da29-4e5f-bae3-802fb86298c1")
 	)
 	(wire
 		(pts
@@ -6728,16 +6498,6 @@
 			(type default)
 		)
 		(uuid "d0f3e4f8-cf39-4261-9f6b-9e6629d93180")
-	)
-	(wire
-		(pts
-			(xy 236.22 36.83) (xy 247.65 36.83)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "d1d3a2ba-cfe2-4763-89bd-d29e2366c7e7")
 	)
 	(wire
 		(pts
@@ -6931,16 +6691,6 @@
 	)
 	(wire
 		(pts
-			(xy 248.92 59.69) (xy 261.62 59.69)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e347a553-0739-4340-90d4-008e8e057aa4")
-	)
-	(wire
-		(pts
 			(xy 142.24 166.37) (xy 147.32 166.37)
 		)
 		(stroke
@@ -7028,16 +6778,6 @@
 			(type default)
 		)
 		(uuid "ed34f4b7-8732-4dc6-99f3-00f20cbc8b70")
-	)
-	(wire
-		(pts
-			(xy 247.65 52.07) (xy 248.92 52.07)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ed5e6f70-3908-4983-8cbb-35f3c5e2d364")
 	)
 	(wire
 		(pts
@@ -7188,16 +6928,6 @@
 			(type default)
 		)
 		(uuid "fc3f5fac-5028-41d5-8ead-d30440bcf402")
-	)
-	(wire
-		(pts
-			(xy 247.65 36.83) (xy 247.65 52.07)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ffd4ddff-1a8a-42b5-b2c7-1b3f0972720f")
 	)
 	(label "I2C1_SDA"
 		(at 40.64 86.36 0)
@@ -7934,74 +7664,6 @@
 			(project ""
 				(path "/0cb0c659-ad14-4dc3-8b7e-e8b9c3c06858"
 					(reference "#PWR0114")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:L")
-		(at 256.54 52.07 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "0f197f64-ff9e-44cd-98ad-c837ce51901c")
-		(property "Reference" "L_alim2"
-			(at 256.54 46.99 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "3.9 µH"
-			(at 256.54 49.53 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "useful:RLS-397"
-			(at 256.54 52.07 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 256.54 52.07 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Inductor"
-			(at 256.54 52.07 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "2"
-			(uuid "eae0a58a-33de-44e2-8cc6-dbda84eeda41")
-		)
-		(pin "1"
-			(uuid "64278f89-55ac-4228-b9db-a77269734a60")
-		)
-		(instances
-			(project ""
-				(path "/0cb0c659-ad14-4dc3-8b7e-e8b9c3c06858"
-					(reference "L_alim2")
 					(unit 1)
 				)
 			)
@@ -10078,75 +9740,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:C")
-		(at 248.92 55.88 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "59952107-3e28-441d-8c64-534ae795fb2a")
-		(property "Reference" "C_alim2"
-			(at 253.238 55.118 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "4.7 µF"
-			(at 252.73 57.912 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:C_1812_4532Metric_Pad1.57x3.40mm_HandSolder"
-			(at 249.8852 59.69 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 248.92 55.88 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Unpolarized capacitor"
-			(at 248.92 55.88 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "d30487ac-9b94-436d-b8a1-1f699dd358cc")
-		)
-		(pin "2"
-			(uuid "73eeea66-fa03-498f-b53f-21185f140978")
-		)
-		(instances
-			(project ""
-				(path "/0cb0c659-ad14-4dc3-8b7e-e8b9c3c06858"
-					(reference "C_alim2")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "power:GND")
 		(at 40.64 81.28 180)
 		(unit 1)
@@ -10276,72 +9869,6 @@
 			(project ""
 				(path "/0cb0c659-ad14-4dc3-8b7e-e8b9c3c06858"
 					(reference "F1")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:+5V")
-		(at 280.67 62.23 180)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "5bac0c21-6828-448b-b847-bcdfd99133c4")
-		(property "Reference" "#PWR0105"
-			(at 280.67 58.42 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "+5V"
-			(at 280.67 67.31 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 280.67 62.23 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 280.67 62.23 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 280.67 62.23 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "586ecabb-371a-4253-92a0-7c742a83a73f")
-		)
-		(instances
-			(project ""
-				(path "/0cb0c659-ad14-4dc3-8b7e-e8b9c3c06858"
-					(reference "#PWR0105")
 					(unit 1)
 				)
 			)
@@ -13715,72 +13242,6 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 261.62 63.5 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "dec45980-1ad0-48b6-8dcf-6905345fe610")
-		(property "Reference" "#PWR0103"
-			(at 261.62 69.85 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 261.62 68.58 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 261.62 63.5 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 261.62 63.5 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 261.62 63.5 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "378f708e-19f4-41ba-81d2-b108628e26cd")
-		)
-		(instances
-			(project ""
-				(path "/0cb0c659-ad14-4dc3-8b7e-e8b9c3c06858"
-					(reference "#PWR0103")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
 		(at 149.86 195.58 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -14175,79 +13636,6 @@
 			(project ""
 				(path "/0cb0c659-ad14-4dc3-8b7e-e8b9c3c06858"
 					(reference "#PWR0132")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Regulator_Switching:R-78E5.0-0.5")
-		(at 273.05 52.07 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "f4d78d68-f7a5-4c91-bee5-d86971ccb28f")
-		(property "Reference" "AlimOption2"
-			(at 273.05 45.72 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "R-78E5.0-0.5"
-			(at 273.05 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Converter_DCDC:Converter_DCDC_RECOM_R-78E-0.5_THT"
-			(at 274.32 58.42 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-					(italic yes)
-				)
-				(justify left)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "https://www.recom-power.com/pdf/Innoline/R-78Exx-0.5.pdf"
-			(at 273.05 52.07 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "500mA Step-Down DC/DC-Regulator, 7-28V input, 5V fixed Output Voltage, LM78xx replacement, -40°C to +85°C, SIP3"
-			(at 273.05 52.07 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "0c72c4c9-5ddc-4b78-a83d-c49f27211653")
-		)
-		(pin "2"
-			(uuid "fc1ddf9e-40b1-42ec-9d97-e382fdd34906")
-		)
-		(pin "3"
-			(uuid "51baf8fa-5514-44e6-9072-5860d6fe6592")
-		)
-		(instances
-			(project ""
-				(path "/0cb0c659-ad14-4dc3-8b7e-e8b9c3c06858"
-					(reference "AlimOption2")
 					(unit 1)
 				)
 			)
