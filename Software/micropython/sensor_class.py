@@ -74,7 +74,7 @@ class TDR_CS616:
     def __init__(self, nb_cs616=8, meas_pin=11,ctrl_pins = [6,7,8], disable_pin=9):
         #self.enable_Pin = Pin(enable_pin,Pin.OUT) # Pin to enable sensors with 5V
         #self.enable_Pin.value(0)
-        self.disable_Pin = Pin(enable_pin,Pin.OUT) # Pin to disable sensors with 5V
+        self.disable_Pin = Pin(disable_pin,Pin.OUT) # Pin to disable sensors with 5V
         self.disable_Pin.value(1) # turn ON to disable
         
         self.switch_control = CD4051.CD4051(ctrl_pins[0],ctrl_pins[1],ctrl_pins[2]) # control of the first CD4051 switch
@@ -153,11 +153,10 @@ class TDR_CS616:
             
             try:
                 value_1, std_freq_meas,nb_loops = self._cs616_measure() # Measure frequency
-                if debug:
-                    print(f"Probe {i} period is {value1:.1f}. It took {nb_loops} loops.") 
+                print(f"Probe {i} period is {value_1:.1f}. It took {nb_loops} loops.") 
                 value_2 = self._convert_period_to_wc(value_1) # convert freq to water content
                 if debug:
-                    print(f"Probe {i} water content is {value2:.1f}")
+                    print(f"Probe {i} water content is {value_2:.1f}")
             except Exception as e:
                 value_1 = 999.9
                 value_2 = 999.9
@@ -214,8 +213,8 @@ class dendrometer:
                 value2 = 0
                 internal_led.value(1)
                 for u in range(0,10):
-                    value1 = value1 + self.ads.read(1,0)/10
-                    value2 = value2 + self.ads.read(1,1)/10
+                    value1 = value1 + self.ads.read(1,0+i*2)/10
+                    value2 = value2 + self.ads.read(1,1+i*2)/10
                     sleep(0.05)
                 internal_led.value(0)
                 sleep(0.05)
@@ -238,5 +237,4 @@ class dendrometer:
         
         watchdog.feed() # feed the watchdog of the datalogger class
         internal_led.value(0)
-        print(data_values)
         return data_values

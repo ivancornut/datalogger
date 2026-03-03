@@ -37,6 +37,7 @@ class datalogger:
         
         # create the sensor objects
         self.sensor_objs = []
+        print(self.sensors)
         for s in self.sensors:
             self.sensor_objs.append(self.create_sensor(s))
         
@@ -126,7 +127,7 @@ class datalogger:
         sensor_name = sensor["type"]
         
         # !!! Campbell CS616 soil humidity probes !!!
-        if sensor_name == "TDR_CS616": 
+        if sensor_name == "CS616": 
             p = sensor["params"]
             return sensor_class.TDR_CS616(nb_cs616=p["number"], meas_pin=p["measPin"],ctrl_pins = p["ctrlPins"], disable_pin = p["disabPin"])
             
@@ -239,10 +240,11 @@ class datalogger:
             if self.usb_pin():
                 # if connected to usb do not sleep
                 # and instead read sensors every 4s
+                print(self.sensor_objs)
                 for sensor in self.sensor_objs:
                     print(sensor.read_values(self.watchdog, self.led, debug = True))
                     self.watchdog.feed()
-                    sleep(4)
+                sleep(4)
             else:
                 if (now.minute%self.interval_minutes) == 0: # check whether it is time to log
                     values = []
