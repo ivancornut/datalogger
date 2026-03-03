@@ -6,6 +6,7 @@ import tempfile
 import os
 import re
 from datetime import datetime
+import sys
 
 def update_computer_time():
     """Update the computer time display"""
@@ -15,19 +16,22 @@ def update_computer_time():
     root.after(1000, update_computer_time)
 
 def soft_reset_device():
-    result = subprocess.run('mpremote soft-reset', capture_output=True, text=True, timeout=10, shell=True)
-    if "no device found" in result.stdout:
+    result = subprocess.run('python -m mpremote soft-reset', capture_output=True, text=True, timeout=10, shell=True)
+    #result = subprocess.run([sys.executable, '-m', 'mpremote', 'soft-reset'], capture_output=True, text=True, timeout=20, shell=True)
+    if ("no device found" in result.stdout) or ("no device found" in result.stderr) :
         print("No device found")
         root.after(1000, soft_reset_device)
     else:
+        print(result.stdout)
+        print(result.stderr)
         print("Device soft reset ready to work")
 
 def get_device_time():
     """Get and display the time from the device"""
-    result = subprocess.run('mpremote run read_rtc_time.py', 
+    result = subprocess.run('python -m mpremote run read_rtc_time.py', 
                           capture_output=True, text=True, timeout=10, shell=True)
     
-    if "no device found" in result.stdout:
+    if ("no device found" in result.stdout) or ("no device found" in result.stderr):
         device_time_output.config(text="Device Time:\nNo device found")
     elif result.returncode == 0:
         # Extract numbers from the output string
@@ -50,10 +54,10 @@ def get_device_time():
 
 def get_battery_voltage():
     """Get and display the time from the device"""
-    result = subprocess.run('mpremote run read_batt_volt.py', 
+    result = subprocess.run('python -m mpremote run read_batt_volt.py', 
                           capture_output=True, text=True, timeout=10, shell=True)
     
-    if "no device found" in result.stdout:
+    if ("no device found" in result.stdout) or ("no device found" in result.stderr):
         batt_volt_output.config(text="Battery voltage:\nNo device found")
     elif result.returncode == 0:
         # Extract numbers from the output string
@@ -68,7 +72,7 @@ def get_sd_files():
     result = subprocess.run('mpremote connect auto run read_sd.py fs ls sd/', 
                           capture_output=True, text=True, timeout=15, shell=True)
     
-    if "no device found" in result.stdout:
+    if ("no device found" in result.stdout) or ("no device found" in result.stderr):
         sd_files_listbox.delete(0, tk.END)
         sd_files_listbox.insert(0, "No device found")
         download_btn.config(state="disabled")
@@ -127,7 +131,7 @@ def download_selected_files():
         filename = filename.split()[1] # get only the filename and not the size
         try:
             # Download file using mpremote
-            result = subprocess.run(f'mpremote run read_sd.py cp :sd/{filename} data/{filename}',capture_output=True, text=True,timeout=30, shell=True)
+            result = subprocess.run(f'python -m mpremote run read_sd.py cp :sd/{filename} data/{filename}',capture_output=True, text=True,timeout=30, shell=True)
             
             print(result.stdout)
 
@@ -156,10 +160,10 @@ def download_selected_files():
 def set_device_time():
     """Set the time on the device"""
     # Run first command: mpremote rtc --set
-    result1 = subprocess.run('mpremote rtc --set', 
+    result1 = subprocess.run('python -m mpremote rtc --set', 
                            capture_output=True, text=True, timeout=10, shell=True)
     
-    if "no device found" in result1.stdout:
+    if ("no device found" in result1.stdout) or ("no device found" in result1.stderr):
         set_time_output.config(text="Set Time Result:\nNo device found")
         return
     elif result1.returncode != 0:
@@ -167,10 +171,10 @@ def set_device_time():
         return
     
     # Run second command: mpremote run set_rtc_time.py
-    result2 = subprocess.run('mpremote run set_rtc_time.py', 
+    result2 = subprocess.run('python -m mpremote run set_rtc_time.py', 
                            capture_output=True, text=True, timeout=10, shell=True)
     
-    if "no device found" in result2.stdout:
+    if ("no device found" in result2.stdout) or ("no device found" in result2.stderr):
         set_time_output.config(text="Set Time Result:\nNo device found")
     elif result2.returncode == 0:
         set_time_output.config(text="Set Time Result:\nDevice time was set")
@@ -179,9 +183,9 @@ def set_device_time():
 
 def check_device_connection():
     """Check if a device is connected using mpremote"""
-    result = subprocess.run('mpremote exec "print(\"connected\")"', 
+    result = subprocess.run('python -m mpremote exec "print(\"connected\")"', 
                           capture_output=True, text=True, timeout=5, shell=True)
-    if "no device found" in result.stdout:
+    if ("no device found" in result.stdout) or ("no device found" in result.stderr):
         return False
     return result.returncode == 0 and "connected" in result.stdout
 
