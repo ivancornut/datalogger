@@ -19,6 +19,8 @@ def soft_reset_device():
     result = subprocess.run('python -m mpremote soft-reset', capture_output=True, text=True, timeout=10, shell=True)
     #result = subprocess.run([sys.executable, '-m', 'mpremote', 'soft-reset'], capture_output=True, text=True, timeout=20, shell=True)
     if ("no device found" in result.stdout) or ("no device found" in result.stderr) :
+        # we need to check in stdout and stderr since 
+        # on unix it is stdout and on windows in stderr
         print("No device found")
         root.after(1000, soft_reset_device)
     else:
