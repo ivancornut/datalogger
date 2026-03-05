@@ -1,6 +1,8 @@
 # Eco&Sols Datalogger
 A comptetitive datalogger for use in environmental science. It is adapted to situtation in remote locations with little access to networks.
 
+The interfacing software is compatible with windows, macOS and linux computers. 
+
   * [Hardware](#hardware)
     + [Full size datalogger](#full-size-datalogger)
     + [Micro sized datalogger](#micro-sized-datalogger)
@@ -31,8 +33,11 @@ It lacks some functionnality of the bigger version such as the controllable powe
 We use two GUIs on the computer:
 - one that generates the json configuration file for the datalogger
 - one that enables communication with the datalogger to update the clock and download files from the SD card
+
 The datalogger management GUI also allows you to setup the datalogger with all the necessary libraries and config files to start datalogging right away.
 #### Windows installation of the management GUI
+The graphical user interface to perform some interfacing functions was made to be as easy to use as possible. For windows an executable file was created by using the pyinstaller library. 
+
 To run on windows you first need to install python on your computer. You can install it easily from the windows store.
 Then open up the powershell:
 ```
