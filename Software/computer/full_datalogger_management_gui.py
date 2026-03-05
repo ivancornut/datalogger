@@ -1,13 +1,28 @@
 import os
 import re
-
-# import json
 import subprocess
 import tkinter as tk
 from datetime import datetime
+from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
-# import sys
+
+def get_relative_path(*parts: str) -> str:
+    """Build a relative path that works on both Windows and Linux."""
+    return str(Path(*parts))
+
+
+def list_files(directory: str) -> list[str]:
+    """Return a list of all files at the given path."""
+    p = Path(directory)
+    pattern = "*"
+    return [str(f) for f in p.glob(pattern) if f.is_file()]
+
+
+def get_filename(filepath: str) -> str:
+    """Extract the filename from a full path."""
+    p = Path(filepath)
+    return p.name
 
 
 def update_computer_time():
@@ -94,7 +109,7 @@ def get_battery_voltage():
 def get_sd_files():
     """Get list of files on the device SD card"""
     result = subprocess.run(
-        "mpremote connect auto run read_sd.py fs ls sd/",
+        "python -m mpremote connect auto run read_sd.py fs ls sd/",
         capture_output=True,
         text=True,
         timeout=15,
@@ -133,6 +148,7 @@ def get_sd_files():
         sd_files_listbox.delete(0, tk.END)
         sd_files_listbox.insert(0, "Error reading SD card")
         download_btn.config(state="disabled")
+        print(result.stderr)
 
 
 def download_selected_files():
@@ -258,6 +274,76 @@ def check_device_connection():
     return result.returncode == 0 and "connected" in result.stdout
 
 
+def init_new_device():
+    """This is to make a new datalogger"""
+    path_files = list_files(get_relative_path("../micropython/libraries"))
+    for filepath in path_files:
+        filename = get_filename(filepath)
+        result = subprocess.run(
+            "python -m mpremote cp " + filepath + " :" + filename,
+            capture_output=True,
+            text=True,
+            timeout=5,
+            shell=True,
+        )
+        print(result.stdout, result.stderr)
+    path_datalogger = get_relative_path("../micropython/datalogger_class.py")
+    filename_datalogger = "datalogger_class.py"
+    path_sensor = get_relative_path("../micropython/sensor_class.py")
+    filename_sensor = "sensor_class.py"
+    path_main = get_relative_path("../micropython/main.py")
+    filename_main = "main.py"
+    result = subprocess.run(
+        "python -m mpremote cp " + path_datalogger + " :" + filename_datalogger,
+        capture_output=True,
+        text=True,
+        timeout=5,
+        shell=True,
+    )
+    print(result.stdout, result.stderr)
+    result = subprocess.run(
+        "python -m mpremote cp " + path_sensor + " :" + filename_sensor,
+        capture_output=True,
+        text=True,
+        timeout=5,
+        shell=True,
+    )
+    result = subprocess.run(
+        "python -m mpremote cp " + path_main + " :" + filename_main,
+        capture_output=True,
+        text=True,
+        timeout=5,
+        shell=True,
+    )
+    print(result.stdout, result.stderr)
+
+    return
+
+
+def upload_file_to_device():
+    """Open a file dialog and upload the selected file to the device root using mpremote."""
+    filepath = filedialog.askopenfilename(title="Select file to upload")
+    if not filepath:
+        return  # User cancelled
+    filename = get_filename(filepath)
+    result = subprocess.run(
+        "python -m mpremote cp " + filepath + " :" + filename,
+        capture_output=True,
+        text=True,
+        timeout=15,
+        shell=True,
+    )
+    print(result.stdout, result.stderr)
+    if ("no device found" in result.stdout) or ("no device found" in result.stderr):
+        messagebox.showerror("Upload Failed", "No device found.")
+    elif result.returncode == 0:
+        messagebox.showinfo("Upload Complete", f"'{filename}' uploaded successfully.")
+    else:
+        messagebox.showerror(
+            "Upload Failed", result.stderr.strip() or result.stdout.strip()
+        )
+
+
 # Create main window
 root = tk.Tk()
 root.title("Datalogger management tool")
@@ -285,7 +371,7 @@ computer_time_label.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
 # Device time section
 get_time_btn = tk.Button(
     left_side,
-    text="Get Device Time",
+    text="Get datalogger time",
     command=get_device_time,
     bg="lightcyan",
     font=("Arial", 9, "bold"),
@@ -307,7 +393,7 @@ device_time_output.grid(row=2, column=0, padx=10, pady=5, sticky="ew")
 # Set device time section
 set_time_btn = tk.Button(
     left_side,
-    text="Set Device Time",
+    text="Set datalogger time",
     command=set_device_time,
     bg="lightcoral",
     font=("Arial", 9, "bold"),
@@ -356,12 +442,37 @@ batt_volt_output = tk.Label(
 )
 batt_volt_output.grid(row=7, column=0, padx=10, pady=5, sticky="ew")
 
+separator = ttk.Separator(left_side, orient="horizontal")
+separator.grid(
+    row=8, column=0, sticky="ew", pady=10
+)  # Add some vertical padding for spacing
+
+# Init new datalogger button
+init_datalogger_btn = tk.Button(
+    left_side,
+    text="Install new datalogger",
+    command=init_new_device,
+    bg="lightcoral",
+    font=("Arial", 9, "bold"),
+)
+init_datalogger_btn.grid(row=9, column=0, padx=10, pady=15, sticky="ew")
+
+# Upload file to device button
+upload_file_btn = tk.Button(
+    left_side,
+    text="Upload file to device",
+    command=upload_file_to_device,
+    bg="lightyellow",
+    font=("Arial", 9, "bold"),
+)
+upload_file_btn.grid(row=10, column=0, padx=10, pady=5, sticky="ew")
+
 # Add vertical separator
 separator = tk.Frame(root, width=2, bg="gray")
 separator.grid(row=0, column=1, rowspan=15, sticky="ns", padx=2)
 
 # SD Card File Management Section
-tk.Label(right_side, text="SD Card Files", font=("Arial", 10, "bold")).grid(
+tk.Label(right_side, text="SD Card Files", font=("Arial", 15, "bold")).grid(
     row=1, column=0, padx=1, pady=(15, 5)
 )
 
