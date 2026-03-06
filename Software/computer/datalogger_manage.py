@@ -8,10 +8,10 @@ from datetime import datetime
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
-
 # =============================================================================
 # Utility functions
 # =============================================================================
+
 
 def get_relative_path(*parts: str) -> str:
     """Build a relative path that works on both Windows and Linux."""
@@ -50,6 +50,7 @@ def device_not_found(result: subprocess.CompletedProcess) -> bool:
 # =============================================================================
 # Sensor configuration dialogs (from config_generator.py)
 # =============================================================================
+
 
 class SensorDialog(tk.Toplevel):
     """Base class for sensor configuration dialogs."""
@@ -117,10 +118,8 @@ class DendroDialog(SensorDialog):
         self.number_var = tk.IntVar(value=1)
         number_frame = ttk.Frame(main_frame)
         number_frame.grid(row=2, column=1, sticky=tk.W, pady=2)
-        ttk.Radiobutton(number_frame, text="1", variable=self.number_var, value=1,
-                         command=self.update_dynamic_fields).pack(side=tk.LEFT)
-        ttk.Radiobutton(number_frame, text="2", variable=self.number_var, value=2,
-                         command=self.update_dynamic_fields).pack(side=tk.LEFT)
+        ttk.Radiobutton(number_frame,text="1",variable=self.number_var,value=1,command=self.update_dynamic_fields,).pack(side=tk.LEFT)
+        ttk.Radiobutton(number_frame,text="2",variable=self.number_var,value=2,command=self.update_dynamic_fields,).pack(side=tk.LEFT)
 
         # Timestep
         ttk.Label(main_frame, text="Timestep (seconds):").grid(row=3, column=0, sticky=tk.W, pady=2)
@@ -152,10 +151,10 @@ class DendroDialog(SensorDialog):
             row_frame = ttk.Frame(self.dynamic_frame)
             row_frame.pack(fill=tk.X, pady=2)
 
-            ttk.Label(row_frame, text=f"Dendro {i+1} Name:").pack(side=tk.LEFT)
+            ttk.Label(row_frame, text=f"Dendro {i + 1} Name:").pack(side=tk.LEFT)
             name_entry = ttk.Entry(row_frame, width=15)
             name_entry.pack(side=tk.LEFT, padx=5)
-            name_entry.insert(0, f"dendro_{i+1}")
+            name_entry.insert(0, f"dendro_{i + 1}")
             self.name_entries.append(name_entry)
 
             ttk.Label(row_frame, text="Excite Pin:").pack(side=tk.LEFT, padx=(10, 0))
@@ -187,9 +186,9 @@ class DendroDialog(SensorDialog):
                     "address": address,
                     "number": self.number_var.get(),
                     "excite": excite_pins,
-                    "names": names
+                    "names": names,
                 },
-                "timestep": timestep
+                "timestep": timestep,
             }
             return True
 
@@ -271,9 +270,9 @@ class CS616Dialog(SensorDialog):
                     "number": number,
                     "ctrlPins": ctrl_pins,
                     "measPin": meas_pin,
-                    "disabPin": disab_Pin
+                    "disabPin": disab_Pin,
                 },
-                "timestep": timestep
+                "timestep": timestep,
             }
             return True
 
@@ -331,11 +330,7 @@ class SHT45Dialog(SensorDialog):
             params = {"name": name}
             params["I2C"] = self.i2c_var.get()
 
-            self.result = {
-                "type": "SHT45",
-                "params": params,
-                "timestep": timestep
-            }
+            self.result = {"type": "SHT45", "params": params, "timestep": timestep}
             return True
 
         except ValueError as e:
@@ -346,6 +341,7 @@ class SHT45Dialog(SensorDialog):
 # =============================================================================
 # Config generator window (opened as Toplevel from the main GUI)
 # =============================================================================
+
 
 class DataloggerConfigApp:
     """Configuration editor window for building datalogger JSON files.
@@ -375,24 +371,34 @@ class DataloggerConfigApp:
         info_frame = ttk.LabelFrame(main_frame, text="Device Information", padding="10")
         info_frame.pack(fill=tk.X, pady=(0, 10))
 
-        ttk.Label(info_frame, text="Device Name:").grid(row=0, column=0, sticky=tk.W, pady=2)
+        ttk.Label(info_frame, text="Device Name:").grid(
+            row=0, column=0, sticky=tk.W, pady=2
+        )
         self.device_name_entry = ttk.Entry(info_frame, width=40)
         self.device_name_entry.grid(row=0, column=1, sticky=tk.W, pady=2, padx=5)
 
-        ttk.Label(info_frame, text="Description:").grid(row=1, column=0, sticky=tk.W, pady=2)
+        ttk.Label(info_frame, text="Description:").grid(
+            row=1, column=0, sticky=tk.W, pady=2
+        )
         self.description_entry = ttk.Entry(info_frame, width=40)
         self.description_entry.grid(row=1, column=1, sticky=tk.W, pady=2, padx=5)
 
-        ttk.Label(info_frame, text="Named Location:").grid(row=2, column=0, sticky=tk.W, pady=2)
+        ttk.Label(info_frame, text="Named Location:").grid(
+            row=2, column=0, sticky=tk.W, pady=2
+        )
         self.named_location_entry = ttk.Entry(info_frame, width=40)
         self.named_location_entry.grid(row=2, column=1, sticky=tk.W, pady=2, padx=5)
 
-        ttk.Label(info_frame, text="Latitude:").grid(row=3, column=0, sticky=tk.W, pady=2)
+        ttk.Label(info_frame, text="Latitude:").grid(
+            row=3, column=0, sticky=tk.W, pady=2
+        )
         self.latitude_entry = ttk.Entry(info_frame, width=20)
         self.latitude_entry.grid(row=3, column=1, sticky=tk.W, pady=2, padx=5)
         self.latitude_entry.insert(0, "9999")
 
-        ttk.Label(info_frame, text="Longitude:").grid(row=4, column=0, sticky=tk.W, pady=2)
+        ttk.Label(info_frame, text="Longitude:").grid(
+            row=4, column=0, sticky=tk.W, pady=2
+        )
         self.longitude_entry = ttk.Entry(info_frame, width=20)
         self.longitude_entry.grid(row=4, column=1, sticky=tk.W, pady=2, padx=5)
         self.longitude_entry.insert(0, "9999")
@@ -401,12 +407,9 @@ class DataloggerConfigApp:
         sensor_btn_frame = ttk.LabelFrame(main_frame, text="Add Sensors", padding="10")
         sensor_btn_frame.pack(fill=tk.X, pady=(0, 10))
 
-        ttk.Button(sensor_btn_frame, text="Add Dendrometer",
-                   command=self.add_dendro).pack(side=tk.LEFT, padx=5)
-        ttk.Button(sensor_btn_frame, text="Add CS616",
-                   command=self.add_cs616).pack(side=tk.LEFT, padx=5)
-        ttk.Button(sensor_btn_frame, text="Add SHT45",
-                   command=self.add_sht45).pack(side=tk.LEFT, padx=5)
+        ttk.Button(sensor_btn_frame, text="Add Dendrometer", command=self.add_dendro).pack(side=tk.LEFT, padx=5)
+        ttk.Button(sensor_btn_frame, text="Add CS616", command=self.add_cs616).pack(side=tk.LEFT, padx=5)
+        ttk.Button(sensor_btn_frame, text="Add SHT45", command=self.add_sht45).pack(side=tk.LEFT, padx=5)
 
         # ===== Sensors List Section =====
         list_frame = ttk.LabelFrame(main_frame, text="Configured Sensors", padding="10")
@@ -429,26 +432,20 @@ class DataloggerConfigApp:
         self.sensor_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        ttk.Button(list_frame, text="Remove Selected",
-                   command=self.remove_sensor).pack(side=tk.BOTTOM, pady=5)
+        ttk.Button(list_frame, text="Remove Selected", command=self.remove_sensor).pack(side=tk.BOTTOM, pady=5)
 
         # ===== Save / Load Section =====
         save_frame = ttk.Frame(main_frame)
         save_frame.pack(fill=tk.X)
 
         # Local file operations (right side)
-        ttk.Button(save_frame, text="Save JSON",
-                   command=self.save_json).pack(side=tk.RIGHT, padx=5)
-        ttk.Button(save_frame, text="Preview JSON",
-                   command=self.preview_json).pack(side=tk.RIGHT, padx=5)
-        ttk.Button(save_frame, text="Load JSON",
-                   command=self.load_json).pack(side=tk.RIGHT, padx=5)
+        ttk.Button(save_frame, text="Save JSON", command=self.save_json).pack(side=tk.RIGHT, padx=5)
+        ttk.Button(save_frame, text="Preview JSON", command=self.preview_json).pack(side=tk.RIGHT, padx=5)
+        ttk.Button(save_frame, text="Load JSON", command=self.load_json).pack(side=tk.RIGHT, padx=5)
 
         # Device operations (left side)
-        ttk.Button(save_frame, text="Save JSON to Device",
-                   command=self.save_json_to_device).pack(side=tk.LEFT, padx=5)
-        ttk.Button(save_frame, text="Import JSON from Device",
-                   command=self.import_json_from_device).pack(side=tk.LEFT, padx=5)
+        ttk.Button(save_frame, text="Save JSON to Device", command=self.save_json_to_device).pack(side=tk.LEFT, padx=5)
+        ttk.Button(save_frame,text="Import JSON from Device",command=self.import_json_from_device,).pack(side=tk.LEFT, padx=5)
 
     # -----------------------------------------------------------------
     # Sensor add / remove helpers
@@ -483,21 +480,24 @@ class DataloggerConfigApp:
             if sensor_type == "dendro":
                 details = f"I2C:{params['I2C']}, Addr:{params['address']}, Names:{params['names']}"
             elif sensor_type == "CS616":
-                details = (f"Num:{params['number']}, CtrlPins:{params['ctrlPins']}, "
-                           f"MeasPin:{params['measPin']}, DisabPin:{params['disabPin']}")
+                details = (
+                    f"Num:{params['number']}, CtrlPins:{params['ctrlPins']}, "
+                    f"MeasPin:{params['measPin']}, DisabPin:{params['disabPin']}"
+                )
             elif sensor_type == "SHT45":
-                i2c = params.get('I2C', 0)
+                i2c = params.get("I2C", 0)
                 details = f"I2C:{i2c}, Name:{params['name']}"
             else:
                 details = str(params)
 
-            self.sensor_tree.insert("", tk.END, iid=str(i), values=(sensor_type, details, timestep))
+            self.sensor_tree.insert(
+                "", tk.END, iid=str(i), values=(sensor_type, details, timestep)
+            )
 
     def remove_sensor(self):
         selected = self.sensor_tree.selection()
         if not selected:
-            messagebox.showwarning("Warning", "Please select a sensor to remove",
-                                     parent=self.parent)
+            messagebox.showwarning("Warning", "Please select a sensor to remove", parent=self.parent)
             return
 
         indices = sorted([int(s) for s in selected], reverse=True)
@@ -533,14 +533,11 @@ class DataloggerConfigApp:
             "device_name": self.device_name_entry.get().strip(),
             "description": self.description_entry.get().strip(),
             "sensors": [],
-            "timesteps": []
+            "timesteps": [],
         }
 
         for sensor in self.sensors:
-            sensor_entry = {
-                "type": sensor["type"],
-                "params": sensor["params"]
-            }
+            sensor_entry = {"type": sensor["type"], "params": sensor["params"]}
             config["sensors"].append(sensor_entry)
             config["timesteps"].append(sensor["timestep"])
 
@@ -570,44 +567,52 @@ class DataloggerConfigApp:
         config = self.build_json()
 
         default_name = self.device_name_entry.get().strip() or "datalogger_config"
-        default_name = "".join(c if c.isalnum() or c in "._-" else "_" for c in default_name)
+        default_name = "".join(
+            c if c.isalnum() or c in "._-" else "_" for c in default_name
+        )
 
         filepath = filedialog.asksaveasfilename(
             parent=self.parent,
             defaultextension=".json",
             filetypes=[("JSON files", "*.json"), ("All files", "*.*")],
-            initialfile=f"{default_name}.json"
+            initialfile=f"{default_name}.json",
         )
 
         if filepath:
             try:
-                with open(filepath, 'w') as f:
+                with open(filepath, "w") as f:
                     json.dump(config, f, indent=4)
-                messagebox.showinfo("Success", f"Configuration saved to:\n{filepath}",
-                                    parent=self.parent)
+                messagebox.showinfo(
+                    "Success",
+                    f"Configuration saved to:\n{filepath}",
+                    parent=self.parent,
+                )
             except Exception as e:
-                messagebox.showerror("Error", f"Failed to save file:\n{e}",
-                                     parent=self.parent)
+                messagebox.showerror(
+                    "Error", f"Failed to save file:\n{e}", parent=self.parent
+                )
 
     def load_json(self):
         """Load a configuration from a local JSON file."""
         filepath = filedialog.askopenfilename(
             parent=self.parent,
-            filetypes=[("JSON files", "*.json"), ("All files", "*.*")]
+            filetypes=[("JSON files", "*.json"), ("All files", "*.*")],
         )
 
         if not filepath:
             return
 
         try:
-            with open(filepath, 'r') as f:
+            with open(filepath, "r") as f:
                 config = json.load(f)
             self._apply_config(config)
-            messagebox.showinfo("Success", "Configuration loaded successfully",
-                                parent=self.parent)
+            messagebox.showinfo(
+                "Success", "Configuration loaded successfully", parent=self.parent
+            )
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to load file:\n{e}",
-                                 parent=self.parent)
+            messagebox.showerror(
+                "Error", f"Failed to load file:\n{e}", parent=self.parent
+            )
 
     # -----------------------------------------------------------------
     # Device operations (mpremote)
@@ -618,11 +623,12 @@ class DataloggerConfigApp:
         tmp_path = os.path.join(tempfile.gettempdir(), "tmp_config.json")
 
         try:
-            with open(tmp_path, 'w') as f:
+            with open(tmp_path, "w") as f:
                 json.dump(config, f, indent=4)
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to write temporary file:\n{e}",
-                                 parent=self.parent)
+            messagebox.showerror(
+                "Error", f"Failed to write temporary file:\n{e}", parent=self.parent
+            )
             return
 
         try:
@@ -630,18 +636,13 @@ class DataloggerConfigApp:
             print(result.stdout, result.stderr)
 
             if device_not_found(result):
-                messagebox.showerror("Error", "No device found.",
-                                     parent=self.parent)
+                messagebox.showerror("Error", "No device found.", parent=self.parent)
             elif result.returncode == 0:
-                messagebox.showinfo("Success", "Configuration saved to device as info.json",
-                                    parent=self.parent)
+                messagebox.showinfo("Success","Configuration saved to device as info.json",parent=self.parent)
             else:
-                messagebox.showerror("Error",
-                                     result.stderr.strip() or result.stdout.strip(),
-                                     parent=self.parent)
+                messagebox.showerror("Error",result.stderr.strip() or result.stdout.strip(),parent=self.parent)
         except subprocess.TimeoutExpired:
-            messagebox.showerror("Error", "Timeout while communicating with device.",
-                                 parent=self.parent)
+            messagebox.showerror("Error", "Timeout while communicating with device.", parent=self.parent)
         finally:
             # Clean up temp file
             if os.path.exists(tmp_path):
@@ -656,28 +657,22 @@ class DataloggerConfigApp:
             print(result.stdout, result.stderr)
 
             if device_not_found(result):
-                messagebox.showerror("Error", "No device found.",
-                                     parent=self.parent)
+                messagebox.showerror("Error", "No device found.", parent=self.parent)
                 return
             if result.returncode != 0:
-                messagebox.showerror("Error",
-                                     result.stderr.strip() or result.stdout.strip(),
-                                     parent=self.parent)
+                messagebox.showerror("Error",result.stderr.strip() or result.stdout.strip(),parent=self.parent)
                 return
         except subprocess.TimeoutExpired:
-            messagebox.showerror("Error", "Timeout while communicating with device.",
-                                 parent=self.parent)
+            messagebox.showerror("Error", "Timeout while communicating with device.", parent=self.parent)
             return
 
         try:
-            with open(tmp_path, 'r') as f:
+            with open(tmp_path, "r") as f:
                 config = json.load(f)
             self._apply_config(config)
-            messagebox.showinfo("Success", "Configuration imported from device",
-                                parent=self.parent)
+            messagebox.showinfo("Success", "Configuration imported from device", parent=self.parent)
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to read config from device:\n{e}",
-                                 parent=self.parent)
+            messagebox.showerror("Error", f"Failed to read config from device:\n{e}", parent=self.parent)
         finally:
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)
@@ -712,7 +707,7 @@ class DataloggerConfigApp:
             sensor = {
                 "type": sensor_data["type"],
                 "params": sensor_data["params"],
-                "timestep": timestep
+                "timestep": timestep,
             }
             self.sensors.append(sensor)
 
@@ -722,6 +717,7 @@ class DataloggerConfigApp:
 # =============================================================================
 # Main management GUI functions
 # =============================================================================
+
 
 def update_computer_time():
     """Update the computer time display."""
@@ -783,12 +779,12 @@ def get_battery_voltage():
         timeout=10,
         shell=True,
     )
-
     if ("no device found" in result.stdout) or ("no device found" in result.stderr):
         batt_volt_output.config(text="Battery voltage:\nNo device found")
     elif result.returncode == 0:
-        numbers = re.findall(r"\d+", result.stdout.strip())
-        batt_volt_output.config(text=f"Battery voltage:\n{numbers} V")
+        match = re.search(r'-?\d+\.?\d*', result.stdout.strip())
+        number = float(match.group())
+        batt_volt_output.config(text=f"Battery voltage:\n{number:.2f} V")
     else:
         batt_volt_output.config(text=f"Battery voltage:\n{result.stdout.strip()}")
 
@@ -802,7 +798,6 @@ def get_sd_files():
         timeout=15,
         shell=True,
     )
-
     if ("no device found" in result.stdout) or ("no device found" in result.stderr):
         sd_files_listbox.delete(0, tk.END)
         sd_files_listbox.insert(0, "No device found")
@@ -881,11 +876,7 @@ def download_selected_files():
             failed_files.append(f"{filename}: {str(e)}")
 
     if downloaded_files and not failed_files:
-        messagebox.showinfo(
-            "Download Complete",
-            f"Successfully downloaded {len(downloaded_files)} file(s) to 'data' directory:\n"
-            + "\n".join(downloaded_files),
-        )
+        messagebox.showinfo("Download Complete",f"Successfully downloaded {len(downloaded_files)} file(s) to 'data' directory:\n"+ "\n".join(downloaded_files))
     elif downloaded_files and failed_files:
         messagebox.showwarning(
             "Partial Download",
@@ -895,11 +886,7 @@ def download_selected_files():
             + "\n".join(failed_files),
         )
     elif failed_files:
-        messagebox.showerror(
-            "Download Failed",
-            f"Failed to download {len(failed_files)} file(s):\n"
-            + "\n".join(failed_files),
-        )
+        messagebox.showerror("Download Failed",f"Failed to download {len(failed_files)} file(s):\n"+ "\n".join(failed_files))
 
 
 def set_device_time():
@@ -1031,125 +1018,63 @@ def open_config_generator():
 
 root = tk.Tk()
 root.title("Datalogger management tool")
-root.geometry("500x500")
+root.geometry("700x650")
+
+style = ttk.Style()
+#style.theme_use('clam')
+style.configure('TButton', font=('Helvetica', 12,'bold'), padding = 5)
+style.configure('TLabel', font=('Helvetica', 12),relief = "sunken", padding = 5)
+
+# Critical — tell the parent columns to stretch:
+root.columnconfigure(0, weight=1)
+root.columnconfigure(2, weight=1)
 
 right_side = tk.Frame(root)
 left_side = tk.Frame(root)
 
-left_side.grid(row=0, column=0)
-right_side.grid(row=0, column=2)
+left_side.grid(row=0, column=0, sticky="nsew")
+right_side.grid(row=0, column=2, sticky="nsew")
 
 # --- LEFT SIDE — Time Management Section ---
 
-computer_time_label = tk.Label(
-    left_side,
-    text="Computer Time:\nLoading...",
-    font=("Arial", 10, "bold"),
-    justify="center",
-    relief="sunken",
-    bd=2,
-    pady=5,
-)
+computer_time_label = ttk.Label(left_side,text="Computer Time:\nLoading...", justify="center", anchor = 'center')
 computer_time_label.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
 
-get_time_btn = tk.Button(
-    left_side,
-    text="Get datalogger time",
-    command=get_device_time,
-    bg="lightcyan",
-    font=("Arial", 9, "bold"),
-)
-get_time_btn.grid(row=1, column=0, padx=10, pady=5, sticky="ew")
+get_time_btn = ttk.Button(left_side,text="Get datalogger time",command=get_device_time)
+get_time_btn.grid(row=1, column=0, padx=10, pady=5, sticky = "ew")
 
-device_time_output = tk.Label(
-    left_side,
-    text="Device Time:\nClick button to check",
-    font=("Arial", 9),
-    justify="center",
-    relief="sunken",
-    bd=1,
-    pady=5,
-    wraplength=150,
-)
+device_time_output = ttk.Label(left_side,text="Device Time:\nClick button to check",justify="center", anchor = 'center')
 device_time_output.grid(row=2, column=0, padx=10, pady=5, sticky="ew")
 
-set_time_btn = tk.Button(
-    left_side,
-    text="Set datalogger time",
-    command=set_device_time,
-    bg="lightcoral",
-    font=("Arial", 9, "bold"),
-)
+set_time_btn = ttk.Button(left_side,text="Set datalogger time",command=set_device_time)
 set_time_btn.grid(row=3, column=0, padx=10, pady=5, sticky="ew")
 
-set_time_output = tk.Label(
-    left_side,
-    text="Set Time Result:\nClick button to set time",
-    font=("Arial", 9),
-    justify="center",
-    relief="sunken",
-    bd=1,
-    pady=5,
-    wraplength=150,
-)
+set_time_output = ttk.Label(left_side,text="Set Time Result:\nClick button to set time",justify="center", anchor = 'center')
 set_time_output.grid(row=4, column=0, padx=10, pady=5, sticky="ew")
 
 separator = ttk.Separator(left_side, orient="horizontal")
 separator.grid(row=5, column=0, sticky="ew", pady=10)
 
-get_batt_volt_btn = tk.Button(
-    left_side,
-    text="Get Battery voltage",
-    command=get_battery_voltage,
-    bg="green",
-    font=("Arial", 9, "bold"),
-)
+get_batt_volt_btn = ttk.Button(left_side,text="Get Battery voltage",command=get_battery_voltage)
 get_batt_volt_btn.grid(row=6, column=0, padx=10, pady=15, sticky="ew")
 
-batt_volt_output = tk.Label(
-    left_side,
-    text="Battery voltage:\nClick button to check",
-    font=("Arial", 9),
-    justify="center",
-    relief="sunken",
-    bd=1,
-    pady=5,
-    wraplength=150,
-)
+batt_volt_output = ttk.Label(left_side,text="Battery voltage:\nClick button to check",justify="center", anchor = 'center')
 batt_volt_output.grid(row=7, column=0, padx=10, pady=5, sticky="ew")
 
 separator = ttk.Separator(left_side, orient="horizontal")
 separator.grid(row=8, column=0, sticky="ew", pady=10)
 
-init_datalogger_btn = tk.Button(
-    left_side,
-    text="Install new datalogger",
-    command=init_new_device,
-    bg="lightcoral",
-    font=("Arial", 9, "bold"),
-)
+init_datalogger_btn = ttk.Button(left_side,text="Install new datalogger", command=init_new_device)
 init_datalogger_btn.grid(row=9, column=0, padx=10, pady=15, sticky="ew")
 
-upload_file_btn = tk.Button(
-    left_side,
-    text="Upload file to device",
-    command=upload_file_to_device,
-    bg="lightyellow",
-    font=("Arial", 9, "bold"),
-)
+upload_file_btn = ttk.Button(left_side,text="Upload file to device",command=upload_file_to_device)
 upload_file_btn.grid(row=10, column=0, padx=10, pady=5, sticky="ew")
 
 # Config generator button
 separator = ttk.Separator(left_side, orient="horizontal")
 separator.grid(row=11, column=0, sticky="ew", pady=10)
 
-config_gen_btn = tk.Button(
-    left_side,
-    text="Config Generator",
-    command=open_config_generator,
-    bg="lightgreen",
-    font=("Arial", 9, "bold"),
-)
+config_gen_btn = ttk.Button(left_side, text="Config Generator",command=open_config_generator)
 config_gen_btn.grid(row=12, column=0, padx=10, pady=5, sticky="ew")
 
 # Vertical separator between left and right panels
@@ -1158,22 +1083,12 @@ separator.grid(row=0, column=1, rowspan=15, sticky="ns", padx=2)
 
 # --- RIGHT SIDE — SD Card File Management Section ---
 
-tk.Label(right_side, text="SD Card Files", font=("Arial", 15, "bold")).grid(
-    row=1, column=0, padx=1, pady=(15, 5)
-)
+tk.Label(right_side, text="SD Card Files", font=("Arial", 15, "bold")).grid(row=1, column=0, padx=1, pady=(15, 5))
 
-get_files_btn = tk.Button(
-    right_side,
-    text="Get SD Card Files",
-    command=get_sd_files,
-    bg="lightsteelblue",
-    font=("Arial", 9, "bold"),
-)
+get_files_btn = ttk.Button(right_side,text="Get SD Card Files",command=get_sd_files)
 get_files_btn.grid(row=2, column=0, padx=5, pady=5, sticky="ew")
 
-sd_files_listbox = tk.Listbox(
-    right_side, height=20, width=50, selectmode=tk.MULTIPLE, font=("Arial", 8)
-)
+sd_files_listbox = tk.Listbox(right_side, height=30, width=50, selectmode=tk.MULTIPLE, font=("Arial", 8))
 sd_files_listbox.grid(row=3, column=0, padx=5, pady=5, sticky="ew")
 sd_files_listbox.insert(0, "Click 'Get SD Card Files' to load")
 
@@ -1182,12 +1097,10 @@ scrollbar.grid(row=3, column=1, sticky="ns", pady=5)
 sd_files_listbox.config(yscrollcommand=scrollbar.set)
 scrollbar.config(command=sd_files_listbox.yview)
 
-download_btn = tk.Button(
+download_btn = ttk.Button(
     right_side,
     text="Download Selected Files",
     command=download_selected_files,
-    bg="lightsalmon",
-    font=("Arial", 9, "bold"),
     state="disabled",
 )
 download_btn.grid(row=4, column=0, padx=10, pady=5, sticky="ew")
