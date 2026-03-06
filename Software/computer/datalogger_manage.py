@@ -1021,9 +1021,9 @@ root.title("Datalogger management tool")
 root.geometry("700x650")
 
 style = ttk.Style()
-#style.theme_use('clam')
-style.configure('TButton', font=('Helvetica', 12,'bold'), padding = 5)
-style.configure('TLabel', font=('Helvetica', 12),relief = "sunken", padding = 5)
+style.theme_use('clam')
+style.configure('TButton', font=('Helvetica', 12,'bold'), foreground = "dark green",padding = 7.5, background = "light yellow")
+style.configure('TLabel', font=('Helvetica', 12),relief = "sunken", padding = 5, background = "white")
 
 # Critical — tell the parent columns to stretch:
 root.columnconfigure(0, weight=1)
