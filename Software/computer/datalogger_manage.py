@@ -354,7 +354,7 @@ class DataloggerConfigApp:
         """parent: a tk.Tk or tk.Toplevel that will contain the widgets."""
         self.parent = parent
         self.parent.title("Datalogger JSON Configuration Generator")
-        self.parent.geometry("800x600")
+        self.parent.geometry("900x700")
 
         self.sensors = []  # List to store sensor configurations
 
