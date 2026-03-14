@@ -853,11 +853,12 @@ def download_selected_files():
             "Error reading SD card",
         ]:
             continue
-        print(filename)
-        filename = filename.split()[1]  # get only the filename and not the size
+        filename, size = filename.rsplit(' ', 1)  # get only the filename and not the size
+        src = f":sd/{filename}"
+        dst = f"data/{filename}"
         try:
             result = subprocess.run(
-                f"python -m mpremote run read_sd.py cp :sd/{filename} data/{filename}",
+                ["python -m mpremote run read_sd.py","cp", src, dst],
                 capture_output=True,
                 text=True,
                 timeout=30,
