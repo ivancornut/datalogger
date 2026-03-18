@@ -1,4 +1,4 @@
-from machine import Pin, PWM, Timer,I2C,lightsleep,WDT, idle, ADC,SPI, ADC
+from machine import Pin, PWM, Timer,I2C,lightsleep,WDT, idle, ADC,SPI, ADC, reset
 from time import  ticks_ms, ticks_diff, sleep, ticks_us
 import sensor_class
 import json
@@ -246,6 +246,15 @@ class datalogger:
                     self.watchdog.feed()
                 sleep(4)
             else:
+                if (now.hour==0 and now.minute ==0):
+                    # this is to reset the datalogger once a day.
+                    if (now.minute%self.interval_minutes) == 0: # check whether it is time to log
+                        values = []
+                        for sensor in self.sensor_objs:
+                            values.append(sensor.read_values(self.watchdog,self.led))
+                            self.watchdog.feed()
+                        self._write_file(values)
+                    reset()
                 if (now.minute%self.interval_minutes) == 0: # check whether it is time to log
                     values = []
                     for sensor in self.sensor_objs:
