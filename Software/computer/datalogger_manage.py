@@ -837,9 +837,9 @@ def download_selected_files():
         )
         return
 
-    data_dir = "data"
-    if not os.path.exists(data_dir):
-        os.makedirs(data_dir)
+    data_dir = filedialog.askdirectory(title="Select download destination folder")
+    if not data_dir:
+        return  # User cancelled
 
     downloaded_files = []
     failed_files = []
@@ -853,19 +853,21 @@ def download_selected_files():
             "Error reading SD card",
         ]:
             continue
-        filename, size = filename.rsplit(' ', 1)  # get only the filename and not the size
+        # Strip leading file size (number) — robust even with spaces in filenames
+        match = re.match(r'^\d+\s+(.+)$', filename)
+        if match:
+            filename = match.group(1)
         src = f":sd/{filename}"
-        dst = f"data/{filename}"
+        dst = str(Path(data_dir) / filename)
+        print(src,dst)
         try:
             result = subprocess.run(
-                ["python -m mpremote run read_sd.py","cp", src, dst],
+                ["python","-m","mpremote","run","read_sd.py","cp",src, dst],
                 capture_output=True,
                 text=True,
                 timeout=30,
-                shell=True,
             )
 
-            print(result.stdout)
 
             if result.returncode == 0:
                 downloaded_files.append(filename)
@@ -877,7 +879,7 @@ def download_selected_files():
             failed_files.append(f"{filename}: {str(e)}")
 
     if downloaded_files and not failed_files:
-        messagebox.showinfo("Download Complete",f"Successfully downloaded {len(downloaded_files)} file(s) to 'data' directory:\n"+ "\n".join(downloaded_files))
+        messagebox.showinfo("Download Complete",f"Successfully downloaded {len(downloaded_files)} file(s) to:\n{data_dir}\n\n"+ "\n".join(downloaded_files))
     elif downloaded_files and failed_files:
         messagebox.showwarning(
             "Partial Download",
