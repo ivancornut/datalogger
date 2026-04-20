@@ -5,7 +5,7 @@ from machine import Pin
 import CD4051
 from counter import PWMCounter
 import onewire, ds18x20
-from micropython_sht4x import sht4x
+import sht4x
 import ads1x15
 
 def standard_deviation_calc(ind_val_array):

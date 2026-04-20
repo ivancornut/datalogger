@@ -13,8 +13,8 @@ class datalogger:
     def __init__(self):
         
         self.testing = False
-        self.i2c_0_used = False # This is to know wether to initialise the I2C ports
-        self.i2c_1_used = False # This is to know wether to initialise the I2C ports
+        self.i2c_0_used = False # This is to know whether to initialise the I2C ports
+        self.i2c_1_used = False # This is to know whether to initialise the I2C ports
         
         try:
             with open('info.json','r') as f:
@@ -28,6 +28,8 @@ class datalogger:
         
         self.battery_pin = ADC(26)
         self.voltage_drop_factor = 1/(22/(68+22))
+        
+        self.temp_sensor = ADC(4)
         
         self.battery_voltage = 12 # dummy to start
         
@@ -106,7 +108,7 @@ class datalogger:
         ### Initial wait and led indication ###
         self.led = Pin(25, Pin.OUT) # internal led of the Pi Pico
         self.led.value(0)
-        for i in range(0,10):
+        for i in range(0,7):
             sleep(1)
             self.led.toggle()
         self.led.value(0)
@@ -121,6 +123,11 @@ class datalogger:
         for i in range(0,10):
             sensor_value = sensor_value + self.battery_pin.read_u16()/10
         self.battery_voltage = sensor_value * (3.3 / 65535) * self.voltage_drop_factor
+    
+    def read_internal_temperature(self):
+        adc_value = self.temp_sensor.read_u16()
+        voltage = adc_value * (3.3 / 65535.0)
+        self.internal_temp = 27 - (voltage - 0.706) / 0.001721
         
     def create_sensor(self,sensor):
         # This function initialises the different sensors
@@ -168,7 +175,10 @@ class datalogger:
             
     
     def _write_file(self,sensor_values,test = False):
+        # read the diagnostics
         self.read_battery_voltage()
+        self.read_internal_temperature()
+        
         vfs.mount(self.filsys, "/sd") # mount the SD card
         if self.multi_files:
             return None
@@ -192,6 +202,8 @@ class datalogger:
                 f.write(f"{now.year:04d}-{now.month:02d}-{now.day:02d}T{now.hour:02d}:{now.minute:02d}:{now.second:02d}")
                 f.write(",")
                 f.write(f"%1.2f" % self.battery_voltage)
+                f.write(",")
+                f.write(f"%1.1f" % self.internal_temp)
                 for sv in sensor_values:
                     for v in sv:
                         f.write(",")
@@ -227,7 +239,7 @@ class datalogger:
             self.led.value(0)
         else:
             self.led.value(1)
-            sleep(0.03)
+            sleep(0.5)
             self.led.value(0)
         self.led.value(0)
     
