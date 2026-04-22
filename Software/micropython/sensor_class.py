@@ -21,6 +21,8 @@ def standard_deviation_calc(ind_val_array):
     return standard_deviation
 
 def rerun_meas_loop(std,sample_mean,criteria):
+    if sample_mean == 0:
+        return False
     var_pct = std/sample_mean * 100
     print(var_pct)
     if var_pct > criteria:
@@ -30,45 +32,113 @@ def rerun_meas_loop(std,sample_mean,criteria):
 
 class temp_DS18B20:
     def __init__(self,meas_pin=12,roms={7: bytearray(b'(\xac`TB \x01\x19'), 6 : bytearray(b'(*n\xf1B \x01\xcb')}):
-        self.dat_pin = machine.Pin(meas_pin)
-        ds18x20.DS18X20(onewire.OneWire(self.dat_pin))
-        self.roms = roms # a dictionnary with sensor number and roms
-        self.column_names = []
+        try:
+            self.dat_pin = Pin(meas_pin)
+            self.ds = ds18x20.DS18X20(onewire.OneWire(self.dat_pin))
+            self.roms = roms # a dictionnary with sensor number and roms
+            self.column_names = []
+            self.exists = True
+        except Exception as e:
+            self.exists = False
+            self.roms = roms # a dictionnary with sensor number and roms
+            self.column_names = []
+            with open('logs.txt','a') as f:
+                f.write("Error initialising ds18B20:")
+                f.write(str(e))
+                f.write("\n")
         for key, value in self.roms.items():
             self.column_names.append("Temp_"+str(key))
+        self.error = False
+        self.total_error = False
+            
     def read_values(self,watchdog,internal_led, debug = False):
-        data_values = []
-        self.ds.convert_temp()
-        for key, value in self.roms.items():
+        if self.exists:
+            data_values = []
             try:
-                temp = self.ds.read_temp(value)
-            except:
-                temp = 999.9
-                print("Issue getting temperature")
-            data_values.append(temp)
-            internal_led.value(1)
-            sleep(0.1)
-            internal_led.value(0)
-        watchdog.feed()
-        return data_values
+                self.ds.convert_temp()
+            except Exception as e:
+                if not self.total_error:
+                    with open('logs.txt','a') as f:
+                        f.write("Error conv temp ds18b20:")
+                        f.write(str(e))
+                        f.write("\n")
+                    self.total_error = True
+                for key, value in self.roms.items():
+                    data_values.append(999999)
+                watchdog.feed()
+                return data_values   
+            sleep(1)
+            for key, value in self.roms.items():
+                try:
+                    temp = self.ds.read_temp(value)
+                except Exception as e:
+                    temp = 999999
+                    if not self.error:
+                        with open('logs.txt','a') as f:
+                            f.write("Error read temp ds18b20:")
+                            f.write(str(e))
+                            f.write("\n")
+                        self.error = True
+                data_values.append(temp)
+                internal_led.value(1)
+                sleep(0.1)
+                internal_led.value(0)
+            watchdog.feed()
+            return data_values
+        else:
+            data_values = []
+            for key, value in self.roms.items():
+                data_values.append(888888)
+            watchdog.feed()
+            return data_values
         
 class temp_hum_sht45:    
     def __init__(self,i2c_obj, name="SHT45"):
-        self.sht = sht4x.SHT4X(i2c_obj)
-        self.column_names  = [name+"_Air Temperature",name+"_RH"]
+        self.error = False
+        self.i2c_obj = i2c_obj
+        try:
+            self.sht = sht4x.SHT4X(self.i2c_obj)
+            self.exists = True
+        except Exception as e:
+            print(e)
+            self.exists = False
+            with open('logs.txt','a') as f:
+                f.write("Error init SHT45:")
+                f.write(str(e))
+                f.write("\n")
+        self.column_names  = [name+"_T_air",name+"_RH_air"]
     
     def read_values(self,watchdog, internal_led, debug = False):
         data_values = []
-        try:
-            temperature, relative_humidity = self.sht.measurements
-        except:
-            temperature = 999.9
-            relative_humidity = 999.9
-        data_values.append(temperature)
-        data_values.append(relative_humidity)
-        watchdog.feed()
-        
-        return data_values
+        if self.exists:
+            try:
+                temperature, relative_humidity = self.sht.measurements
+            except Exception as e:
+                print(e)
+                temperature = 999999
+                relative_humidity = 999999
+                if not self.error:
+                    with open('logs.txt','a') as f:
+                        f.write("Error read SHT45:")
+                        f.write(str(e))
+                        f.write("\n")
+                    self.error = True
+            data_values.append(temperature)
+            data_values.append(relative_humidity)
+            watchdog.feed()
+            print("SHT45 data:",data_values)
+            return data_values
+        else:
+            data_values.append(888888)
+            data_values.append(888888)
+            try:
+                self.sht = sht4x.SHT4X(self.i2c_obj)
+                self.exists = True
+            except:
+                self.exists = False
+            watchdog.feed()
+            print(data_values)
+            return data_values
     
 class TDR_CS616:
     def __init__(self, nb_cs616=8, meas_pin=11,ctrl_pins = [6,7,8], disable_pin=9):
@@ -103,10 +173,11 @@ class TDR_CS616:
         self.pin_counter.reset()
         
         outlier = True # to see if there is a major discrepancy between meass
-        ind_freqs = []
         stop_loop = 0 
         
         while outlier:
+            ind_freqs = []
+            mean_freq = 0
             if stop_loop > 3:
                 mean_freq = 0
                 outlier = False
@@ -148,18 +219,19 @@ class TDR_CS616:
             self.switch_control.set_output(i)
             #self.enable_Pin.value(1)
             self.disable_Pin.value(0)
-            
-            sleep(0.5) # just wait for it to turn on
-            
+            sleep(0.3) # just wait for it to turn on
             try:
                 value_1, std_freq_meas,nb_loops = self._cs616_measure() # Measure frequency
-                print(f"Probe {i} period is {value_1:.1f}. It took {nb_loops} loops.") 
-                value_2 = self._convert_period_to_wc(value_1) # convert freq to water content
+                print(f"Probe {i} period is {value_1:.1f}. It took {nb_loops} loops.")
+                if value_1 == 0:
+                    value_2 = 0
+                else:
+                    value_2 = self._convert_period_to_wc(value_1) # convert freq to water content
                 if debug:
                     print(f"Probe {i} water content is {value_2:.1f}")
             except Exception as e:
-                value_1 = 999.9
-                value_2 = 999.9
+                value_1 = 999999
+                value_2 = 999999
                 print("Error: ",e)
             
             self.disable_Pin.value(1)
@@ -181,7 +253,11 @@ class TDR_CS616:
 
 class dendrometer:
     def __init__(self,i2c_obj,on_pins=[6],nb_dendros=1,addr=72,names=["test"]):
-        gain = 1
+        self.error = False
+        self.i2c_obj = i2c_obj
+        self.addr = addr
+        self.gain = 1
+        
         self.excite_pins = []
         try:
             c = 0
@@ -189,9 +265,15 @@ class dendrometer:
                 self.excite_pins.append(Pin(i,Pin.OUT))
                 self.excite_pins[c].value(0)
                 c = c+1
-            self.ads = ads1x15.ADS1115(i2c_obj, addr, gain)
+            self.ads = ads1x15.ADS1115(i2c_obj, addr, self.gain)
+            self.exists = True
         except Exception as e:
             print(e)
+            with open('logs.txt','a') as f:
+                f.write("Error init ADS1115:")
+                f.write(str(e))
+                f.write("\n")
+            self.exists = False
         
         self.nb_dendros = nb_dendros
         if self.nb_dendros == 1:
@@ -205,36 +287,59 @@ class dendrometer:
             
     def read_values(self,watchdog,internal_led, debug = False):
         data_values = []
-        try:
-            for i in range(0,self.nb_dendros):
-                self.excite_pins[i].value(1)
-                sleep(0.05)
-                value1 = 0
-                value2 = 0
-                internal_led.value(1)
-                for u in range(0,10):
-                    value1 = value1 + self.ads.read(1,0+i*2)/10
-                    value2 = value2 + self.ads.read(1,1+i*2)/10
+        if self.exists:
+            try:
+                for i in range(0,self.nb_dendros):
+                    self.excite_pins[i].value(1)
                     sleep(0.05)
-                internal_led.value(0)
-                sleep(0.05)
-                self.excite_pins[i].value(0)
-                data_values.append(value1)
-                data_values.append(value2)
-                data_values.append(value2/value1)
-                
-        except Exception as e:
-            print(e)
+                    value1 = 0
+                    value2 = 0
+                    internal_led.value(1)
+                    for u in range(0,10):
+                        value1 = value1 + self.ads.read(1,0+i*2)/10
+                        value2 = value2 + self.ads.read(1,1+i*2)/10
+                        sleep(0.05)
+                    internal_led.value(0)
+                    sleep(0.05)
+                    self.excite_pins[i].value(0)
+                    data_values.append(value1)
+                    data_values.append(value2)
+                    ratio = value2/value1 if value1 != 0 else 999999
+                    data_values.append(ratio)
+                    
+            except Exception as e:
+                print(e)
+                if not self.error:
+                    with open('logs.txt','a') as f:
+                        f.write("Error read dendro:")
+                        f.write(str(e))
+                        f.write("\n")
+                if self.nb_dendros == 2:
+                    for i in range(len(data_values),6):
+                        data_values.append(999999)
+                else:
+                    data_values = [999999,999999,999999]
+                self.error = True
+            
+            for n in range(0,self.nb_dendros):
+                self.excite_pins[n].value(0) # make sure the activation pin is off
+            
+            watchdog.feed() # feed the watchdog of the datalogger class
+            internal_led.value(0)
+            print("Dendro data:",data_values)
+            return data_values
+        else:
+            try:
+                self.ads = ads1x15.ADS1115(self.i2c_obj, self.addr, self.gain)
+                self.exists = True
+            except:
+                self.exists = False
             if self.nb_dendros == 2:
-                print(data_values)
-                for i in range(len(data_values),6):
-                    data_values.append(999999)
+                    for i in range(len(data_values),6):
+                        data_values.append(888888)
             else:
-                data_values = [999999,999999,999999]
-        
-        for n in range(0,self.nb_dendros):
-            self.excite_pins[n].value(0) # make sure the activation pin is off
-        
-        watchdog.feed() # feed the watchdog of the datalogger class
-        internal_led.value(0)
-        return data_values
+                data_values = [888888,888888,888888]
+            watchdog.feed() # feed the watchdog of the datalogger class
+            print("Dendro data:",data_values)
+            internal_led.value(0)
+            return data_values
