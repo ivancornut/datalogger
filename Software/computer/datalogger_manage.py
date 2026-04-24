@@ -740,6 +740,21 @@ def soft_reset_device():
     else:
         print(result.stdout)
         print(result.stderr)
+        result = subprocess.run(
+            "python -m mpremote reset",
+            capture_output=True,
+            text=True,
+            timeout=10,
+            shell=True,
+        )
+
+        result = subprocess.run(
+            "python -m mpremote soft-reset",
+            capture_output=True,
+            text=True,
+            timeout=10,
+            shell=True,
+        )
         print("Device soft reset ready to work")
 
 
