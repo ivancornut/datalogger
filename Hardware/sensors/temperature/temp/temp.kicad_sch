@@ -212,6 +212,130 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Device:R"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "R"
+				(at 2.032 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "R"
+				(at 0 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at -1.778 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Resistor"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "R res resistor"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "R_*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "R_0_1"
+				(rectangle
+					(start -1.016 -2.54)
+					(end 1.016 2.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "R_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "Sensor_Temperature:TMP1826DGK"
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -823,6 +947,26 @@
 	)
 	(wire
 		(pts
+			(xy 100.33 114.3) (xy 100.33 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1394710f-dfb4-47fd-bff3-eca76e85ab0f")
+	)
+	(wire
+		(pts
+			(xy 100.33 128.27) (xy 100.33 121.92)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1a31b717-b046-48fc-aab4-7464c7f8058d")
+	)
+	(wire
+		(pts
 			(xy 115.57 67.31) (xy 129.54 67.31)
 		)
 		(stroke
@@ -890,6 +1034,16 @@
 			(type default)
 		)
 		(uuid "854a017f-be20-49ba-b7e9-b2e308d38362")
+	)
+	(wire
+		(pts
+			(xy 100.33 101.6) (xy 105.41 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "96f46ed7-50fc-488b-9539-cc31aaecd22b")
 	)
 	(wire
 		(pts
@@ -980,16 +1134,6 @@
 			(type default)
 		)
 		(uuid "e2fc22ce-4534-4263-9b69-0ab63f38eb49")
-	)
-	(wire
-		(pts
-			(xy 99.06 101.6) (xy 105.41 101.6)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e4d26eb2-7aad-4608-96f1-63fb3370c6fd")
 	)
 	(wire
 		(pts
@@ -1638,6 +1782,76 @@
 		)
 	)
 	(symbol
+		(lib_id "Device:R")
+		(at 100.33 118.11 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "9a1513ce-fc4c-4a00-bc12-544777cb9dc8")
+		(property "Reference" "R1"
+			(at 102.87 116.8399 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "R"
+			(at 102.87 119.3799 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
+			(at 98.552 118.11 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 100.33 118.11 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 100.33 118.11 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "77564e28-600a-45fd-a800-cf38f6f8ddd6")
+		)
+		(pin "1"
+			(uuid "9a428e1d-43fb-4686-baf4-3e06de485315")
+		)
+		(instances
+			(project "temp"
+				(path "/b5a1c361-04ae-4923-b6c2-708ee26a336b"
+					(reference "R1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Connector:Conn_01x03_Socket")
 		(at 71.12 109.22 180)
 		(unit 1)
@@ -1781,7 +1995,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 99.06 101.6 0)
+		(at 100.33 128.27 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -1790,7 +2004,7 @@
 		(fields_autoplaced yes)
 		(uuid "f95a66fe-ffe7-4e84-9126-834bbbff254b")
 		(property "Reference" "#PWR06"
-			(at 99.06 107.95 0)
+			(at 100.33 134.62 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1799,7 +2013,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 99.06 106.68 0)
+			(at 100.33 133.35 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1807,7 +2021,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 99.06 101.6 0)
+			(at 100.33 128.27 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1816,7 +2030,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 99.06 101.6 0)
+			(at 100.33 128.27 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1825,7 +2039,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 99.06 101.6 0)
+			(at 100.33 128.27 0)
 			(effects
 				(font
 					(size 1.27 1.27)
