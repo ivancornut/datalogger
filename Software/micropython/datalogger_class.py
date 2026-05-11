@@ -125,16 +125,19 @@ class datalogger:
             for i in range(0,7):
                 sleep(1)
                 self.led.toggle()
+                sleep(0.3)
                 self.led.value(0)
         elif status=="no_info_file":
             for i in range(0,15):
                 sleep(0.3)
                 self.led.toggle()
+                sleep(0.3)
                 self.led.value(0)
         elif status=="USB_conn":
             for i in range(0,2):
                 sleep(1)
                 self.led.toggle()
+                sleep(0.3)
                 self.led.value(0)
         else:
             return False

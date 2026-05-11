@@ -24,7 +24,7 @@ def rerun_meas_loop(std,sample_mean,criteria):
     if sample_mean == 0:
         return False
     var_pct = std/sample_mean * 100
-    print(var_pct)
+    print(f"Variance: %1.1f" % var_pct)
     if var_pct > criteria:
         return True
     else:
@@ -163,7 +163,7 @@ class TDR_CS616:
         
         self.number = nb_cs616
         
-    def _cs616_measure(self):
+    def _cs616_measure(self, watchdog):
         ''' The frequency measuring function
         the period of the CS616 is then used to deduce soil
         water content'''
@@ -178,9 +178,6 @@ class TDR_CS616:
         while outlier:
             ind_freqs = []
             mean_freq = 0
-            if stop_loop > 3:
-                mean_freq = 0
-                outlier = False
             for i in range(1,11):
                 cond = True
                 last_check = ticks_us()
@@ -195,7 +192,11 @@ class TDR_CS616:
                 self.pin_counter.reset()
             stop_loop = stop_loop+1
             std_freq = standard_deviation_calc(ind_freqs)
-            outlier = rerun_meas_loop(std_freq,mean_freq,0.1)
+            outlier = rerun_meas_loop(std_freq,mean_freq,2)
+            if stop_loop > 3:
+                mean_freq = 0
+                outlier = False
+            watchdog.feed()
         try:
             period = 1/mean_freq * 1000000 # in us
         except:
@@ -206,6 +207,8 @@ class TDR_CS616:
     def _convert_period_to_wc(self,period_value):
         # this function is given in the manual of the CS616
         VW=(-0.0663 + (-0.0063*period_value)+(0.0007*period_value**2))*100
+        if (VW>80):
+            VW = 9999
         return VW
     
     def turn_off(self):
@@ -221,7 +224,7 @@ class TDR_CS616:
             self.disable_Pin.value(0)
             sleep(0.3) # just wait for it to turn on
             try:
-                value_1, std_freq_meas,nb_loops = self._cs616_measure() # Measure frequency
+                value_1, std_freq_meas,nb_loops = self._cs616_measure(watchdog) # Measure frequency
                 print(f"Probe {i} period is {value_1:.1f}. It took {nb_loops} loops.")
                 if value_1 == 0:
                     value_2 = 0
