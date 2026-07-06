@@ -15,12 +15,12 @@ difference(){
         }
     }
     translate([-9,0,0]){
-        cyl(d = 0.9,h = 30,$fn = 100);
+        cyl(d = 1.5,h = 30,$fn = 100);
     }
     translate([-9+2.9,-2.4/2,0]){
-        cyl(d = 0.9,h = 30,$fn = 100);
+        cyl(d = 1.5,h = 30,$fn = 100);
     }
     translate([-9+2.9,2.4/2,0]){
-        cyl(d = 0.9,h = 30,$fn = 100);
+        cyl(d = 1.5,h = 30,$fn = 100);
     }
 }
