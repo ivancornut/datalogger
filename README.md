@@ -12,8 +12,8 @@ The interfacing software is compatible with windows, macOS and linux computers.
 
 ## Hardware
 ### Full size datalogger
-![3D rendering of datalogger PCB](datalogger_pcb.png)
-We use a custome made PCB that integrates
+![Finished datalogger PCB](datalogger_real.jpg)
+We use a custom made PCB that integrates
 - A battery input (usable with 12V lead batteries)
 - a low consumption and high efficiency step-down converter that can convert 6-40V down to 5V
 - a low-drift RTC clock
