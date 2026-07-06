@@ -5,17 +5,17 @@
       "Application": "Pcbnew",
       "Version": "9.0.9-9.0.9~ubuntu22.04.1"
     },
-    "CreationDate": "2026-07-02T09:42:56+01:00"
+    "CreationDate": "2026-06-09T18:41:45+01:00"
   },
   "GeneralSpecs": {
     "ProjectId": {
-      "Name": "datalogger_pcb",
-      "GUID": "64617461-6c6f-4676-9765-725f7063622e",
+      "Name": "temp",
+      "GUID": "74656d70-2e6b-4696-9361-645f70636258",
       "Revision": "rev?"
     },
     "Size": {
-      "X": 127.55,
-      "Y": 123.35
+      "X": 20.65,
+      "Y": 4.65
     },
     "LayerNumber": 2,
     "BoardThickness": 1.6,
@@ -34,47 +34,47 @@
   ],
   "FilesAttributes": [
     {
-      "Path": "datalogger_pcb-F_Cu.gbr",
+      "Path": "temp-F_Cu.gbr",
       "FileFunction": "Copper,L1,Top",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "datalogger_pcb-B_Cu.gbr",
+      "Path": "temp-B_Cu.gbr",
       "FileFunction": "Copper,L2,Bot",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "datalogger_pcb-F_Paste.gbr",
+      "Path": "temp-F_Paste.gbr",
       "FileFunction": "SolderPaste,Top",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "datalogger_pcb-B_Paste.gbr",
+      "Path": "temp-B_Paste.gbr",
       "FileFunction": "SolderPaste,Bot",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "datalogger_pcb-F_Silkscreen.gbr",
+      "Path": "temp-F_Silkscreen.gbr",
       "FileFunction": "Legend,Top",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "datalogger_pcb-B_Silkscreen.gbr",
+      "Path": "temp-B_Silkscreen.gbr",
       "FileFunction": "Legend,Bot",
       "FilePolarity": "Positive"
     },
     {
-      "Path": "datalogger_pcb-F_Mask.gbr",
+      "Path": "temp-F_Mask.gbr",
       "FileFunction": "SolderMask,Top",
       "FilePolarity": "Negative"
     },
     {
-      "Path": "datalogger_pcb-B_Mask.gbr",
+      "Path": "temp-B_Mask.gbr",
       "FileFunction": "SolderMask,Bot",
       "FilePolarity": "Negative"
     },
     {
-      "Path": "datalogger_pcb-Edge_Cuts.gbr",
+      "Path": "temp-Edge_Cuts.gbr",
       "FileFunction": "Profile",
       "FilePolarity": "Positive"
     }

@@ -18,6 +18,6 @@ spi = machine.SPI(0,
 
 sd = sdcard.SDCard(spi, cs)
 # we use the now standard (as of the latest micropython version) vfs library 
-filsys = vfs.VfsFat(sd)
+#filsys = vfs.VfsFat(sd)
 
-vfs.mount(filsys, "/sd") # mount the SD to make it readable by the connected computer
+#vfs.mount(filsys, "/sd") # mount the SD to make it readable by the connected computer
