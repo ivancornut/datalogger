@@ -1,4 +1,4 @@
-# Eco&Sols Datalogger
+# Open Ecophysio Datalogger
 A comptetitive datalogger for use in environmental science. It is adapted to situtation in remote locations with little access to networks.
 
 The interfacing software is compatible with windows, macOS and linux computers. 
