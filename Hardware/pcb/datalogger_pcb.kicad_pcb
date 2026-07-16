@@ -15104,8 +15104,8 @@
 			(justify left bottom)
 		)
 	)
-	(gr_text "SDA SCL"
-		(at 55.1 99.9 0)
+	(gr_text "SCL SDA"
+		(at 55.85 100 0)
 		(layer "F.SilkS")
 		(uuid "0dcd8b89-7d4e-48d9-b9c0-eeb31e8c5f7e")
 		(effects
@@ -15128,7 +15128,7 @@
 			(justify left bottom)
 		)
 	)
-	(gr_text "SDA SCL"
+	(gr_text "SCL SDA"
 		(at 85.7 100.3 0)
 		(layer "F.SilkS")
 		(uuid "c20e35ca-363b-44cc-af74-f95fb9050b31")
