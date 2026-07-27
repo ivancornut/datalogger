@@ -15490,8 +15490,8 @@
 			(justify left bottom)
 		)
 	)
-	(gr_text "100k"
-		(at 150.2 53.4 90)
+	(gr_text "Rbypass"
+		(at 150 54.6 90)
 		(layer "F.SilkS")
 		(uuid "c88991f1-8fa1-49cb-bd71-80634c98ef12")
 		(effects

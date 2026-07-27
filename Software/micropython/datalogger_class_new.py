@@ -2,10 +2,10 @@ from machine import Pin, PWM, Timer,I2C,lightsleep,WDT, idle, ADC,SPI, reset, de
 from time import sleep
 import sensor_class
 import json
-import urtc
 import sdcard
 import vfs
 import os
+from ds3231 import DS3231
 
 class datalogger:
     """ A datalogger class to be used with any sensors
@@ -20,13 +20,21 @@ class datalogger:
         self.i2c_0_used = False # This is to know whether to initialise the I2C ports
         self.i2c_1_used = False # This is to know whether to initialise the I2C ports
         
+        self.usb_pin = Pin(24, Pin.IN) # identifies if Pi Pico is plugged into a computer
+        
+        if self.usb_pin():
+            self.blink_status("USB_conn")
+            sleep(8) # time for the reset before setting the watchdog
+        else:
+            self.blink_status("start_ok")
+        
         try:
             with open('info.json','r') as f:
                 config = json.load(f)
             self.file_prefix = config["device_name"]
             self.sensors = config["sensors"]
             self.timesteps = config["timesteps"]
-            self.cowbell = config["Cowbell"]
+
         except Exception as e:
             print(e)
             with open('logs.txt','a') as f:
@@ -34,7 +42,9 @@ class datalogger:
                 f.write(str(e))
                 f.write("\n")
             self.blink_status("no_info_file")
+            self.blink_status(status="major_err")
             deepsleep(30*60*1000)
+            
         
         self.battery_pin = ADC(26)
         self.voltage_drop_factor = 1/(22/(68+22))
@@ -43,9 +53,31 @@ class datalogger:
         
         self.battery_voltage = 12 # dummy to start
         
-        self.usb_pin = Pin(24, Pin.IN) # identifies if Pi Pico is plugged into a computer
         
         self.column_names = ["Battery_voltage","internal_temperature"] # initialise column names
+        
+        #!!!! New version that integrates SD card and precision RTC clock !!!!
+        try:
+            cs = Pin(17, Pin.OUT)
+            spi= SPI(0, baudrate=1000000,polarity=0,phase=0,bits=8,firstbit=SPI.MSB,sck=Pin(18),mosi=Pin(19),miso=Pin(16))
+            self.sd = sdcard.SDCard(spi, cs)
+            self.filsys = vfs.VfsFat(self.sd)
+        except Exception as e:
+            print("Error in SD card setup:")
+            print(e)
+            self.blink_status(status="major_err") # Blink to indicate issue to user
+            deepsleep(30*60*1000)
+        try:
+            self.i2c_clock = I2C(0, sda=Pin(4), scl=Pin(5))  # Correct I2C pins for RP2040
+            self.i2c_0_used = True
+            self.rtc = DS3231(self.i2c_clock) # for time
+            sleep(0.2)
+            self.rtc.output_32kHz(False)
+        except Exception as e:
+            print("Error in RTC setup:")
+            print(e)
+            self.blink_status(status="major_err") # Blink to indicate issue to user
+            deepsleep(30*60*1000)
         
         # create the sensor objects
         self.sensor_objs = []
@@ -55,35 +87,19 @@ class datalogger:
         
         # the sensor objects will output the corresponding columns
         for sensor in self.sensor_objs:
-            self.column_names = self.column_names + sensor.column_names
-        
-        # check if the dafruit cowbell datalogger module is attached
-        if self.cowbell:
-            try:
-                 # set up SD card if necessary, adapted for the Pi cowbell datalogger
-                cs = Pin(17,Pin.OUT)
-                spi = SPI(0, baudrate=1000000,polarity=0,phase=0,bits=8,
-                                  firstbit=SPI.MSB,sck=Pin(18),mosi=Pin(19),miso=Pin(16))
-                self.sd = sdcard.SDCard(spi, cs)
-                self.filsys = vfs.VfsFat(self.sd)
-                # The RTC for the cowbell datalogger board
-                self.i2c_clock = I2C(0,scl=Pin(5), sda=Pin(4))
-                self.rtc = urtc.PCF8523(self.i2c_clock)
-                self.i2c_0_used = True
-            except Exception as e:
-                print(e)
-                with open('logs.txt','a') as f:
-                    f.write("Error connecting cowbell:")
-                    f.write(str(e))
-                    f.write("\n")
-        
+            if sensor.exists:
+                self.column_names = self.column_names + sensor.column_names
+            
+         
         # check if all timesteps are equal:
         val = self.timesteps[0]
         self.is_timer = False
         self.different_timesteps = len(set(self.timesteps)) > 1
         self.multi_files = self.different_timesteps
         if len(set(self.timesteps)) > 1:
-            raise NotImplementedError("Mixed timesteps not yet supported")
+            self.blink_status(status="major_err") # Blink to indicate issue to user
+            print("Mixed timesteps not yet supported")
+            deepsleep(30*60*1000)
         
         if self.different_timesteps:
             # this is experimental does not work for now
@@ -108,17 +124,12 @@ class datalogger:
                 self.is_timer = True
             else:
                 self.interval = val
-        
-        if self.usb_pin():
-            self.blink_status("USB_conn")
-            sleep(8) # time for the reset before setting the watchdog
-        else:
-            self.blink_status("start_ok")
-            
-        ### Watchdog ###
+                
+         ### Watchdog ###
         """ The watchdog will reset the device if execution stops for whatever reason
         this is useful since bugs or unexpected errors can happen """
         self.watchdog = WDT(timeout=8000)
+        
     
     def blink_status(self, status):
         if status=="start_ok":
@@ -138,6 +149,12 @@ class datalogger:
                 sleep(1)
                 self.led.toggle()
                 sleep(0.3)
+                self.led.value(0)
+        elif status=="major_err":
+            for i in range(0,20):
+                sleep(0.5)
+                self.led.toggle()
+                sleep(2)
                 self.led.value(0)
         else:
             return False
@@ -196,9 +213,9 @@ class datalogger:
             return sensor_class.temp_DS18B20(meas_pin=p[0],roms = p[1])
         
         # !!! TMP1826 temperature sensor !!!
-        elif sensor_name = "tmp1826":
+        elif sensor_name == "TMP1826":
             p = sensor["params"]
-            return sensor_class.temp_tmp1826(meas_pin=p[0])
+            return sensor_class.temp_tmp1826(meas_pin=p["meas_pin"])
             
     
     def _write_file(self,sensor_values,test = False):
@@ -208,10 +225,17 @@ class datalogger:
         
         vfs.mount(self.filsys, "/sd") # mount the SD card
         if self.multi_files:
+            vfs.umount("/sd")
             return None
         else:
-            now = self.rtc.datetime() # check date
-            local_filename = self.file_prefix+'_'+str(now.year)+"-"+str(now.month)+"-"+str(now.day)+".csv"
+            datetime = self.rtc.datetime() # check date
+            year = datetime[0]
+            month = datetime[1]
+            day = datetime[2]
+            hour = datetime[4]
+            minute = datetime[5]
+            second = datetime[6]
+            local_filename = self.file_prefix+'_'+str(year)+"-"+str(month)+"-"+str(day)+".csv"
             if test:
                 self.filename = "test.csv"
             else:
@@ -226,7 +250,7 @@ class datalogger:
                     f.write("\n")    
             with open(self.filename,'a') as f:
                 # append the file with the newline of data
-                f.write(f"{now.year:04d}-{now.month:02d}-{now.day:02d}T{now.hour:02d}:{now.minute:02d}:{now.second:02d}")
+                f.write(f"{year:04d}-{month:02d}-{day:02d}T{hour:02d}:{minute:02d}:{second:02d}")
                 f.write(",")
                 f.write(f"%1.2f" % self.battery_voltage)
                 f.write(",")
@@ -240,27 +264,19 @@ class datalogger:
             self.watchdog.feed()
     
     def _display_batt(self):
-        if self.battery_voltage > 12.7:
-            self.led.value(1)
-            sleep(0.03)
-            self.led.value(0)
-            sleep(0.1)
-            self.led.value(1)
-            sleep(0.03)
-            self.led.value(0)
-            sleep(0.1)
-            self.led.value(1)
-            sleep(0.03)
-            self.led.value(0)
-        elif self.battery_voltage <= 12.7 and self.battery_voltage > 12.5:
-            self.led.value(1)
-            sleep(0.03)
-            self.led.value(0)
-            sleep(0.1)
-            self.led.value(1)
-            sleep(0.03)
-            self.led.value(0)
-        elif self.battery_voltage <= 12.5:
+        if self.battery_voltage > 12.6:
+            for i in range(0,3):
+                sleep(0.1)
+                self.led.value(1)
+                sleep(0.03)
+                self.led.value(0)
+        elif self.battery_voltage <= 12.6 and self.battery_voltage > 12.4:
+            for i in range(0,2):
+                sleep(0.1)
+                self.led.value(1)
+                sleep(0.03)
+                self.led.value(0)
+        elif self.battery_voltage <= 12.4 and self.battery_voltage > 12.15:
             self.led.value(1)
             sleep(0.03)
             self.led.value(0)
@@ -275,56 +291,63 @@ class datalogger:
         more than a minute """
         self.interval_minutes = self.interval // 60
         while True:
-            now = self.rtc.datetime() # check the datetime
+            datetime = self.rtc.datetime() # check the datetime
+            hour = datetime[4]
+            minute = datetime[5]
             if self.usb_pin():
                 self.read_internal_temperature()
                 # if connected to usb do not sleep
                 # and instead read sensors every 4s
                 print(self.sensor_objs)
                 for sensor in self.sensor_objs:
-                    sensor.read_values(self.watchdog, self.led, debug = True)
+                    if sensor.exists:
+                        sensor.read_values(self.watchdog, self.led, debug = True)
                     self.watchdog.feed()
                 print(f"Internal temp: %1.1f" % self.internal_temp)
                 sleep(4)
             else:
-                if (now.hour==0 and now.minute ==0):
+                if (hour==0 and minute ==0):
                     # this is to reset the datalogger once a day.
-                    if (now.minute%self.interval_minutes) == 0: # check whether it is time to log
+                    if (minute%self.interval_minutes) == 0: # check whether it is time to log
                         values = []
                         for sensor in self.sensor_objs:
-                            values.append(sensor.read_values(self.watchdog,self.led))
+                            if sensor.exists:
+                                values.append(sensor.read_values(self.watchdog,self.led))
                             self.watchdog.feed()
                         self._write_file(values)
+                    else:
+                        for i in range(0,10):
+                            self.watchdog.feed()
+                            lightsleep(6000)
                     reset()
-                if (now.minute%self.interval_minutes) == 0: # check whether it is time to log
+                if (minute%self.interval_minutes) == 0: # check whether it is time to log
                     values = []
                     for sensor in self.sensor_objs:
-                        values.append(sensor.read_values(self.watchdog,self.led))
+                        if sensor.exists:
+                            values.append(sensor.read_values(self.watchdog,self.led))
                         self.watchdog.feed()
                     self._write_file(values)
                     
                     # Then sleep to keep energy
-                    for i in range(0,9*self.interval_minutes):
-                        lightsleep(5750)
+                    for i in range(0,6*self.interval_minutes):
+                        lightsleep(7000)
                         self.watchdog.feed()
-                        #self._display_batt()
-                        self.led.value(1)
-                        sleep(0.03)
-                        self.led.value(0)
+                        self._display_batt()
                 else:
-                    for i in range(0,5):
-                        lightsleep(5750)
+                    for i in range(0,4):
+                        lightsleep(7000)
                         self.watchdog.feed()
-                        #self._display_batt()
-                        self.led.value(1)
-                        sleep(0.03)
-                        self.led.value(0)
+                        self._display_batt()
                     
     def _run_test(self):
         while True:
             values = []
             for sensor in self.sensor_objs:
-                values.append(sensor.read_values(self.watchdog,self.led))
+                if sensor.exists:
+                    values.append(sensor.read_values(self.watchdog,self.led))
+                else:
+                    print("Error sensor doesn't exist")
+                    print(sensor)
                 self.watchdog.feed()
             self._write_file(values, test = True)
             sleep(5)

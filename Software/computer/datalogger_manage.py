@@ -337,6 +337,51 @@ class SHT45Dialog(SensorDialog):
             messagebox.showerror("Validation Error", f"Invalid input: {e}")
             return False
 
+class TMP1826Dialog(SensorDialog):
+    """Dialog for configuring TMP1826 temperature sensors."""
+
+    def __init__(self, parent):
+        super().__init__(parent, "Add TMP1826 Sensor")
+
+    def create_widgets(self):
+        main_frame = ttk.Frame(self, padding="10")
+        main_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Measurement Pin
+        ttk.Label(main_frame, text="Measurement Pin:").grid(row=1, column=0, sticky=tk.W, pady=2)
+        self.enab_entry = ttk.Entry(main_frame, width=10)
+        self.enab_entry.grid(row=1, column=1, sticky=tk.W, pady=2)
+        self.enab_entry.insert(0, "9")
+
+         # Timestep
+        ttk.Label(main_frame, text="Timestep (seconds):").grid(row=2, column=0, sticky=tk.W, pady=2)
+        self.timestep_entry = ttk.Entry(main_frame, width=10)
+        self.timestep_entry.grid(row=2, column=1, sticky=tk.W, pady=2)
+        self.timestep_entry.insert(0, "10")
+
+        # Buttons
+        btn_frame = ttk.Frame(main_frame)
+        btn_frame.grid(row=3, column=0, columnspan=2, pady=10)
+        ttk.Button(btn_frame, text="OK", command=self.ok).pack(side=tk.LEFT, padx=5)
+        ttk.Button(btn_frame, text="Cancel", command=self.cancel).pack(side=tk.LEFT, padx=5)
+
+    def validate(self):
+        try:
+
+            timestep = int(self.timestep_entry.get())
+            if timestep <= 0:
+                raise ValueError("Timestep must be positive")
+
+            meas_pin = int(self.enab_entry.get())
+            params = {"meas_pin": meas_pin}
+
+            self.result = {"type": "TMP1826", "params": params, "timestep": timestep}
+            return True
+
+        except ValueError as e:
+            messagebox.showerror("Validation Error", f"Invalid input: {e}")
+            return False
+
 
 # =============================================================================
 # Config generator window (opened as Toplevel from the main GUI)
@@ -410,6 +455,7 @@ class DataloggerConfigApp:
         ttk.Button(sensor_btn_frame, text="Add Dendrometer", command=self.add_dendro).pack(side=tk.LEFT, padx=5)
         ttk.Button(sensor_btn_frame, text="Add CS616", command=self.add_cs616).pack(side=tk.LEFT, padx=5)
         ttk.Button(sensor_btn_frame, text="Add SHT45", command=self.add_sht45).pack(side=tk.LEFT, padx=5)
+        ttk.Button(sensor_btn_frame, text="Add TMP1826", command=self.add_tmp1826).pack(side=tk.LEFT, padx=5)
 
         # ===== Sensors List Section =====
         list_frame = ttk.LabelFrame(main_frame, text="Configured Sensors", padding="10")
@@ -464,6 +510,12 @@ class DataloggerConfigApp:
 
     def add_sht45(self):
         dialog = SHT45Dialog(self.parent)
+        if dialog.result:
+            self.sensors.append(dialog.result)
+            self.update_sensor_list()
+
+    def add_tmp1826(self):
+        dialog = TMP1826Dialog(self.parent)
         if dialog.result:
             self.sensors.append(dialog.result)
             self.update_sensor_list()
