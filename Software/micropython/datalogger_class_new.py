@@ -133,7 +133,7 @@ class datalogger:
     
     def blink_status(self, status):
         if status=="start_ok":
-            for i in range(0,7):
+            for i in range(0,3):
                 sleep(1)
                 self.led.toggle()
                 sleep(0.3)
