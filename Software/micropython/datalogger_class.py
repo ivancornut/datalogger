@@ -34,6 +34,8 @@ class datalogger:
             self.file_prefix = config["device_name"]
             self.sensors = config["sensors"]
             self.timesteps = config["timesteps"]
+            batt_r1 = float(config["batt_R1"])
+            batt_r2 = float(config["batt_R2"])
 
         except Exception as e:
             print(e)
@@ -47,7 +49,7 @@ class datalogger:
             
         
         self.battery_pin = ADC(26)
-        self.voltage_drop_factor = 1/(22/(68+22))
+        self.voltage_drop_factor = 1/(batt_r1/(batt_r2+batt_r1))
         
         self.temp_sensor = ADC(4)
         self.battery_voltage = 12 # dummy to start in case below doesn't work

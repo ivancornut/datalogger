@@ -399,7 +399,7 @@ class DataloggerConfigApp:
         """parent: a tk.Tk or tk.Toplevel that will contain the widgets."""
         self.parent = parent
         self.parent.title("Datalogger JSON Configuration Generator")
-        self.parent.geometry("900x700")
+        self.parent.geometry("900x800")
 
         self.sensors = []  # List to store sensor configurations
 
@@ -447,6 +447,15 @@ class DataloggerConfigApp:
         self.longitude_entry = ttk.Entry(info_frame, width=20)
         self.longitude_entry.grid(row=4, column=1, sticky=tk.W, pady=2, padx=5)
         self.longitude_entry.insert(0, "9999")
+
+        ttk.Label(info_frame, text="Battery resistor real values:").grid(row=5, column=0, sticky=tk.W, pady=2)
+        self.r1_entry = ttk.Entry(info_frame, width=5)
+        self.r1_entry.grid(row=6, column=0, sticky=tk.W, pady=2, padx=5)
+        self.r1_entry.insert(0, "22")
+
+        self.r2_entry = ttk.Entry(info_frame, width=5)
+        self.r2_entry.grid(row=6, column=1, sticky=tk.W, pady=2, padx=5)
+        self.r2_entry.insert(0, "68")
 
         # ===== Add Sensors Section =====
         sensor_btn_frame = ttk.LabelFrame(main_frame, text="Add Sensors", padding="10")
@@ -571,6 +580,20 @@ class DataloggerConfigApp:
             latitude = self.latitude_entry.get().strip()
 
         try:
+            r1 = float(self.r1_entry.get().strip())
+            if r1 == int(r1):
+                r1 = int(r1)
+        except ValueError:
+            r1 = self.r1_entry.get().strip()
+
+        try:
+            r2 = float(self.r2_entry.get().strip())
+            if r2 == int(r2):
+                r2 = int(r2)
+        except ValueError:
+            r2 = self.r2_entry.get().strip()
+
+        try:
             longitude = float(self.longitude_entry.get().strip())
             if longitude == int(longitude):
                 longitude = int(longitude)
@@ -584,6 +607,8 @@ class DataloggerConfigApp:
             "named_location": self.named_location_entry.get().strip(),
             "device_name": self.device_name_entry.get().strip(),
             "description": self.description_entry.get().strip(),
+            "batt_R1":r1,
+            "batt_R2":r2,
             "sensors": [],
             "timesteps": [],
         }
