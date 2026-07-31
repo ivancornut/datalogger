@@ -1,7 +1,7 @@
 from time import  sleep_ms, sleep, ticks_us, ticks_ms, ticks_diff
 import math
 from machine import Pin
-
+import binascii
 import CD4051
 from counter import PWMCounter
 import onewire, ds18x20
@@ -49,7 +49,7 @@ class temp_tmp1826:
             sleep(0.25)
             for i in self.roms:
                 label = self.sensor.read_label(i)
-                self.sensor_dict[i] = label
+                self.sensor_dict[str(binascii.hexlify(i))] = label
                 self.column_names.append("Temp_"+label)
         except Exception as e:
             print("Error in initialising tmp1826 sensor")
@@ -69,7 +69,7 @@ class temp_tmp1826:
             self.sensor.convert_temp()
             sleep(0.750)
             for i in self.roms:
-                print("Sensor: "+self.sensor_dict[i])
+                print("Sensor: "+self.sensor_dict[str(binascii.hexlify(i))])
                 try:
                     data_values.append(self.sensor.read_temp(i, verbose = True))
                 except Exception as e:
