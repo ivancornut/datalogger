@@ -1,12 +1,18 @@
 import json
 import os
 import re
+import shutil
 import subprocess
 import tempfile
 import tkinter as tk
 from datetime import datetime
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
+
+import pandas as pd
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.figure import Figure
+from serial.tools import list_ports  # ships with mpremote (pyserial)
 
 # =============================================================================
 # Utility functions
@@ -790,6 +796,125 @@ class DataloggerConfigApp:
 
         self.update_sensor_list()
 
+class DataVisualisationApp:
+    """Download one CSV from the SD card to a temp folder and plot its columns."""
+
+    MISSING = 9999  # sentinel written by the logger for a failed reading
+
+    def __init__(self, parent):
+        """parent: a tk.Tk or tk.Toplevel that will contain the widgets."""
+        self.parent = parent
+        self.parent.title("Data Visualiser")
+        self.parent.geometry("900x800")
+        self.tmpdir = Path(tempfile.mkdtemp(prefix="datalogger_viz_"))
+        self.df = None
+        self.create_widgets()
+        self.parent.protocol("WM_DELETE_WINDOW", self.close)
+
+    def create_widgets(self):
+        main_frame = ttk.Frame(self.parent, padding="10")
+        main_frame.pack(fill=tk.BOTH, expand=True)
+
+        top = ttk.Frame(main_frame)
+        top.pack(fill=tk.X, pady=(0, 5))
+        ttk.Button(top, text="List SD files", command=self.list_files).pack(side=tk.LEFT)
+        self.file_combo = ttk.Combobox(top, state="readonly", width=40)
+        self.file_combo.pack(side=tk.LEFT, padx=5)
+        ttk.Button(top, text="Load & plot", command=self.load_file).pack(side=tk.LEFT)
+        self.status = ttk.Label(top, text="")
+        self.status.pack(side=tk.LEFT, padx=10)
+
+        body = ttk.Frame(main_frame)
+        body.pack(fill=tk.BOTH, expand=True)
+
+        side = ttk.Frame(body)
+        side.pack(side=tk.LEFT, fill=tk.Y, padx=(0, 5))
+        ttk.Label(side, text="Columns").pack()
+        self.col_list = tk.Listbox(side, selectmode=tk.EXTENDED, width=22, exportselection=False)
+        self.col_list.pack(fill=tk.Y, expand=True)
+        self.col_list.bind("<<ListboxSelect>>", lambda e: self.plot())
+
+        self.fig = Figure(figsize=(7, 6))
+        self.canvas = FigureCanvasTkAgg(self.fig, master=body)
+        self.canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        NavigationToolbar2Tk(self.canvas, main_frame).update()
+
+    def list_files(self):
+        """Populate the dropdown with the CSV files found on the SD card."""
+        try:
+            result = run_mpremote("connect auto run read_sd.py fs ls sd/", timeout=15)
+        except subprocess.TimeoutExpired:
+            self.status.config(text="Timeout")
+            return
+        if device_not_found(result) or result.returncode != 0:
+            self.status.config(text="No device found")
+            return
+        files = [
+            re.sub(r"^\d+\s+", "", line.strip()).removeprefix("sd/")
+            for line in result.stdout.splitlines()
+            if line.strip().endswith(".csv")
+        ]
+        self.file_combo["values"] = files
+        self.status.config(text=f"{len(files)} CSV file(s)")
+        if files:
+            self.file_combo.current(0)
+
+    def load_file(self):
+        """Copy the selected CSV to the temp folder, clean it, and plot it."""
+        name = self.file_combo.get()
+        if not name:
+            return
+        dst = self.tmpdir / name
+        self.status.config(text=f"Downloading {name}...")
+        self.parent.update_idletasks()
+        if not dst.exists():
+            try:
+                result = subprocess.run(
+                    ["python", "-m", "mpremote", "run", "read_sd.py", "cp", f":sd/{name}", str(dst)],
+                    capture_output=True, text=True, timeout=120,
+                )
+            except subprocess.TimeoutExpired:
+                self.status.config(text="Download timed out")
+                return
+            if result.returncode != 0 or not dst.exists():
+                messagebox.showerror("Error", f"Could not download {name}", parent=self.parent)
+                self.status.config(text="Download failed")
+                return
+
+        df = pd.read_csv(dst)
+        time_col = df.columns[0]
+        df[time_col] = pd.to_datetime(df[time_col], errors="coerce")
+        df = df.set_index(time_col).apply(pd.to_numeric, errors="coerce")
+        self.df = df.replace(self.MISSING, float("nan"))
+
+        self.col_list.delete(0, tk.END)
+        for col in self.df.columns:
+            self.col_list.insert(tk.END, col)
+        self.col_list.selection_set(0, tk.END)
+        self.status.config(text=f"{name}: {len(self.df)} rows")
+        self.plot()
+
+    def plot(self):
+        """One stacked subplot per selected column, sharing the DateTime axis."""
+        cols = [self.col_list.get(i) for i in self.col_list.curselection()]
+        self.fig.clear()
+        if self.df is None or not cols:
+            self.canvas.draw()
+            return
+        axes = self.fig.subplots(len(cols), 1, sharex=True, squeeze=False)[:, 0]
+        for ax, col in zip(axes, cols):
+            ax.plot(self.df.index, self.df[col], ".-", ms=2, lw=0.8)
+            ax.set_ylabel(col, fontsize=7)
+            ax.tick_params(labelsize=7)
+            ax.grid(alpha=0.3)
+        self.fig.autofmt_xdate()
+        self.fig.tight_layout()
+        self.canvas.draw()
+
+    def close(self):
+        """Delete the temporary download folder and close the window."""
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
+        self.parent.destroy()
 
 # =============================================================================
 # Main management GUI functions
@@ -802,37 +927,55 @@ def update_computer_time():
     computer_time_label.config(text=f"Computer Time:\n{current_time}")
     root.after(1000, update_computer_time)
 
+# USB vendor ID of the datalogger (0x2E8A = Raspberry Pi RP2040).
+# Set to None to accept any USB serial device.
+DEVICE_VID = 0x2E8A
+
+
+def device_present() -> bool:
+    """True if the datalogger is enumerated as a USB serial port.
+
+    Only lists ports, never opens them, so this is safe to poll even while
+    mpremote is talking to the device.
+    """
+    return any(
+        port.vid is not None and (DEVICE_VID is None or port.vid == DEVICE_VID)
+        for port in list_ports.comports()
+    )
+
 
 def soft_reset_device():
-    result = subprocess.run(
-        "python -m mpremote soft-reset",
-        capture_output=True,
-        text=True,
-        timeout=10,
-        shell=True,
-    )
-    if ("no device found" in result.stdout) or ("no device found" in result.stderr):
-        print("No device found")
+    """Wait for a datalogger, reset it, then watch for it being unplugged."""
+    if not device_present():
         root.after(1000, soft_reset_device)
-    else:
+        return
+
+    try:
+        result = run_mpremote("soft-reset")
+        if device_not_found(result):
+            root.after(1000, soft_reset_device)  # enumerated but not ready yet
+            return
         print(result.stdout)
         print(result.stderr)
-        result = subprocess.run(
-            "python -m mpremote reset",
-            capture_output=True,
-            text=True,
-            timeout=10,
-            shell=True,
-        )
+        run_mpremote("reset")
+        run_mpremote("soft-reset")
+    except subprocess.TimeoutExpired:
+        root.after(1000, soft_reset_device)
+        return
 
-        result = subprocess.run(
-            "python -m mpremote soft-reset",
-            capture_output=True,
-            text=True,
-            timeout=10,
-            shell=True,
-        )
-        print("Device soft reset ready to work")
+    print("Device soft reset ready to work")
+    root.after(3000, wait_for_disconnect)  # 3 s so the hard reset can re-enumerate
+
+
+def wait_for_disconnect(misses: int = 0):
+    """Once the datalogger is unplugged, go back to waiting for the next one."""
+    if device_present():
+        root.after(1000, wait_for_disconnect)
+    elif misses < 2:  # debounce brief USB dropouts
+        root.after(1000, lambda: wait_for_disconnect(misses + 1))
+    else:
+        print("Device disconnected, waiting for the next datalogger")
+        root.after(1000, soft_reset_device)
 
 
 def get_device_time():
@@ -1106,6 +1249,11 @@ def open_config_generator():
     config_window = tk.Toplevel(root)
     DataloggerConfigApp(config_window)
 
+def open_data_visualiser():
+    """Open the data visualiser in a new Toplevel window."""
+    viz_window = tk.Toplevel(root)
+    DataVisualisationApp(viz_window)
+
 
 # =============================================================================
 # Build the main window
@@ -1183,9 +1331,10 @@ tk.Label(right_side, text="SD Card Files", font=("Arial", 15, "bold")).grid(row=
 get_files_btn = ttk.Button(right_side,text="Get SD Card Files",command=get_sd_files)
 get_files_btn.grid(row=2, column=0, padx=5, pady=5, sticky="ew")
 
-sd_files_listbox = tk.Listbox(right_side, height=30, width=50, selectmode=tk.MULTIPLE, font=("Arial", 8))
+sd_files_listbox = tk.Listbox(right_side, height=30, width=50, selectmode=tk.EXTENDED, font=("Arial", 8))
 sd_files_listbox.grid(row=3, column=0, padx=5, pady=5, sticky="ew")
 sd_files_listbox.insert(0, "Click 'Get SD Card Files' to load")
+sd_files_listbox.bind("<Control-a>", lambda e: (sd_files_listbox.select_set(0, tk.END), "break"))
 
 scrollbar = tk.Scrollbar(right_side, orient="vertical")
 scrollbar.grid(row=3, column=1, sticky="ns", pady=5)
@@ -1199,6 +1348,13 @@ download_btn = ttk.Button(
     state="disabled",
 )
 download_btn.grid(row=4, column=0, padx=10, pady=5, sticky="ew")
+
+visualise_btn = ttk.Button(
+    right_side,
+    text="Visualise data",
+    command=open_data_visualiser,
+)
+visualise_btn.grid(row=5, column=0, padx=10, pady=5, sticky="ew")
 
 left_side.grid_columnconfigure(0, weight=1)
 right_side.grid_columnconfigure(0, weight=1)
