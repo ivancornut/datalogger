@@ -782,6 +782,12 @@ class DataloggerConfigApp:
         self.description_entry.delete(0, tk.END)
         self.description_entry.insert(0, config.get("description", ""))
 
+        self.r1_entry.delete(0, tk.END)
+        self.r1_entry.insert(0, config.get("batt_R1", ""))
+
+        self.r2_entry.delete(0, tk.END)
+        self.r2_entry.insert(0, config.get("batt_R2", ""))
+
         sensors_list = config.get("sensors", [])
         timesteps_list = config.get("timesteps", [])
 

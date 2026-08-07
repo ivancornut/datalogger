@@ -5615,16 +5615,6 @@
 	)
 	(wire
 		(pts
-			(xy 27.94 142.24) (xy 27.94 144.78)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "1bb21152-6b06-4536-af81-089eb95deca7")
-	)
-	(wire
-		(pts
 			(xy 118.11 100.33) (xy 105.41 100.33)
 		)
 		(stroke
@@ -6125,16 +6115,6 @@
 	)
 	(wire
 		(pts
-			(xy 17.78 142.24) (xy 17.78 144.78)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "4aa5c4b9-2dec-4bf6-ba11-6cfbc7f12360")
-	)
-	(wire
-		(pts
 			(xy 218.44 119.38) (xy 218.44 123.19)
 		)
 		(stroke
@@ -6392,16 +6372,6 @@
 			(type default)
 		)
 		(uuid "6208efd6-4a7d-4f01-9831-70e01288a0ba")
-	)
-	(wire
-		(pts
-			(xy 27.94 133.35) (xy 27.94 134.62)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "63408607-f6c7-44d8-a987-15bec643fb12")
 	)
 	(wire
 		(pts
@@ -7245,16 +7215,6 @@
 	)
 	(wire
 		(pts
-			(xy 17.78 133.35) (xy 17.78 134.62)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c19dfecb-a81b-4656-9b86-464141d4d26d")
-	)
-	(wire
-		(pts
 			(xy 33.02 170.18) (xy 33.02 173.99)
 		)
 		(stroke
@@ -8003,16 +7963,6 @@
 		)
 		(uuid "12978b3b-ef5f-4280-9a9a-ede1a1176abf")
 	)
-	(label "I2C0_SDA"
-		(at 27.94 144.78 270)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "15d1cc39-51cf-42af-b47f-85540165abad")
-	)
 	(label "MOSI"
 		(at 186.69 85.09 0)
 		(effects
@@ -8414,16 +8364,6 @@
 			(justify left bottom)
 		)
 		(uuid "fd5658c5-ea1f-4f91-b0a3-afc7c470e6ff")
-	)
-	(label "I2C0_SCL"
-		(at 17.78 144.78 270)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "fd9e28dd-236a-4095-984f-78db8e7ccd76")
 	)
 	(label "Data_Onewire"
 		(at 171.45 92.71 0)
@@ -11567,75 +11507,6 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 27.94 138.43 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "62bd667e-77bc-4d92-81ee-36953a16517c")
-		(property "Reference" "RpullupSDA0"
-			(at 32.004 137.922 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "10k"
-			(at 30.48 139.6999 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Resistor_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Vertical"
-			(at 26.162 138.43 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 27.94 138.43 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 27.94 138.43 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "2"
-			(uuid "4004bc97-a26e-492a-bd59-9ebd73c65bcd")
-		)
-		(pin "1"
-			(uuid "465424de-b8ef-4e00-af7d-b7c9d5d473a8")
-		)
-		(instances
-			(project "datalogger_pcb"
-				(path "/0cb0c659-ad14-4dc3-8b7e-e8b9c3c06858"
-					(reference "RpullupSDA0")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
 		(at 132.08 172.72 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -13862,75 +13733,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:R")
-		(at 17.78 138.43 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "b144b735-d02e-445f-a3ea-da45d31cf7c3")
-		(property "Reference" "RpullupSCL0"
-			(at 22.352 138.176 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "10k"
-			(at 20.32 139.6999 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Resistor_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Vertical"
-			(at 16.002 138.43 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 17.78 138.43 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 17.78 138.43 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "2"
-			(uuid "5466de1d-aadb-4c82-b8fb-c42ec3b52fd6")
-		)
-		(pin "1"
-			(uuid "aa47b71c-7e4d-432a-8b08-e43819f18894")
-		)
-		(instances
-			(project "datalogger_pcb"
-				(path "/0cb0c659-ad14-4dc3-8b7e-e8b9c3c06858"
-					(reference "RpullupSCL0")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Device:C")
 		(at 274.32 60.96 0)
 		(unit 1)
@@ -14329,72 +14131,6 @@
 			(project "datalogger_pcb"
 				(path "/0cb0c659-ad14-4dc3-8b7e-e8b9c3c06858"
 					(reference "#PWR0109")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:+3.3V")
-		(at 27.94 133.35 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "bf31d513-1f01-4937-a844-f9b39d64d5b1")
-		(property "Reference" "#PWR021"
-			(at 27.94 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "+3.3V"
-			(at 27.94 128.27 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 27.94 133.35 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 27.94 133.35 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+3.3V\""
-			(at 27.94 133.35 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "0d19400e-e90b-4834-8be7-6f424e32a04a")
-		)
-		(instances
-			(project "datalogger_pcb"
-				(path "/0cb0c659-ad14-4dc3-8b7e-e8b9c3c06858"
-					(reference "#PWR021")
 					(unit 1)
 				)
 			)
@@ -15509,72 +15245,6 @@
 			(project "datalogger_pcb"
 				(path "/0cb0c659-ad14-4dc3-8b7e-e8b9c3c06858"
 					(reference "#PWR024")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:+3.3V")
-		(at 17.78 133.35 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "d751abfb-c330-407a-8a30-040889c2bf93")
-		(property "Reference" "#PWR020"
-			(at 17.78 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "+3.3V"
-			(at 17.78 128.27 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 17.78 133.35 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 17.78 133.35 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+3.3V\""
-			(at 17.78 133.35 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "f7cc7fe5-0b57-4f46-b8d8-44fc828fe7ac")
-		)
-		(instances
-			(project "datalogger_pcb"
-				(path "/0cb0c659-ad14-4dc3-8b7e-e8b9c3c06858"
-					(reference "#PWR020")
 					(unit 1)
 				)
 			)
