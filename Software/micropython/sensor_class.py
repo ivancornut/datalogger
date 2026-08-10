@@ -167,14 +167,13 @@ class temp_hum_sht45:
         return data_values
     
 class TDR_CS616:
-    def __init__(self, nb_cs616=8, meas_pin=11,ctrl_pins = [6,7,8], disable_pin=9):
+    def __init__(self, nb_cs616=8, meas_pin=11,ctrl_pins = [6,7,8], disable_pin=9,corrected=False,rtc=None):
         #self.enable_Pin = Pin(enable_pin,Pin.OUT) # Pin to enable sensors with 5V
         #self.enable_Pin.value(0)
         self.disable_Pin = Pin(disable_pin,Pin.OUT) # Pin to disable sensors with 5V
         self.disable_Pin.value(1) # turn ON to disable
         
         self.switch_control = CD4051.CD4051(ctrl_pins[0],ctrl_pins[1],ctrl_pins[2]) # control of the first CD4051 switch
-        #self.signal_control = CD4051.CD4051(sig_ctrl_pins[0],sig_ctrl_pins[1],sig_ctrl_pins[2]) # control of the second CD4051 switch
         
         # create the column names for each sensor
         self.column_names = []
@@ -190,6 +189,12 @@ class TDR_CS616:
         self.exists = True # allways exists since no way to check
         
         self.number = nb_cs616
+        self.corrected = corrected
+        
+        if corrected:
+            self.rtc = rtc
+            self.rtc.output_32kHz(False)
+            self.column_names.append("32kHz_correction")
         
     def _cs616_measure(self, watchdog):
         ''' The frequency measuring function
@@ -235,6 +240,40 @@ class TDR_CS616:
         
         return period, std_freq, stop_loop
     
+    def measure_32kHz(watchdog):
+        ''' Measure the 32.768 kHz frequency of RTC'''
+        sampling_time = 100000
+        mean_freq = 0
+        self.pin_counter.stop()
+        self.pin_counter.reset()
+        
+        outlier = True # to see if there is a major discrepancy between meass
+        stop_loop = 0 
+        
+        while outlier:
+            ind_freqs = []
+            mean_freq = 0
+            for i in range(1,11):
+                cond = True
+                last_check = ticks_us()
+                self.pin_counter.start()
+                while cond:
+                    if ticks_diff(tmp := ticks_us(), last_check) >= sampling_time:
+                        freq = self.pin_counter.read_and_reset() / (sampling_time / 1000000)
+                        ind_freqs.append(freq)
+                        mean_freq = mean_freq + (freq)/10
+                        cond = False
+                self.pin_counter.stop()
+                self.pin_counter.reset()
+            stop_loop = stop_loop+1
+            std_freq = standard_deviation_calc(ind_freqs)
+            outlier = rerun_meas_loop(std_freq,mean_freq,2)
+            if stop_loop > 3:
+                mean_freq = 0
+                outlier = False
+            watchdog.feed()
+        return period, std_freq, stop_loop    
+    
     def _convert_period_to_wc(self,period_value):
         # this function is given in the manual of the CS616
         VW=(-0.0663 + (-0.0063*period_value)+(0.0007*period_value**2))*100
@@ -248,6 +287,19 @@ class TDR_CS616:
         
     def read_values(self,watchdog,internal_led, debug = False):
         data_values = []
+        error_in_corr = False
+        
+        ### Correction 1:
+        if self.corrected:
+            self.disable_Pin.value(1) # make sure we are not receiving any CS616 data
+            self.rtc.output_32kHz(True) # turn on kHz temperature corrected output from RTC
+            sleep(0.1)
+            try:
+                freq_corr1, std_freq_meas,nb_loops = measure_32kHz(watchdog) # Measure frequency
+            except:
+                freq_corr = 9999
+                error_in_corr = True
+            self.rtc.output_32kHz(False) # turn off kHz temperature corrected output from RTC
         
         for i in range(0,self.number):
             self.switch_control.set_output(i)
@@ -285,6 +337,22 @@ class TDR_CS616:
         
         self.switch_control.set_output(0) # go back to first position to avoid pin getting stuck
         self.disable_Pin.value(1)
+        
+        ### Frequency Correction 2:
+        if self.corrected:
+            self.disable_Pin.value(1) # make sure we are not receiving any CS616 data
+            sleep(0.1)
+            self.rtc.output_32kHz(True) # turn on kHz temperature corrected output from RTC
+            sleep(0.1)
+            try:
+                freq_corr2, std_freq_meas,nb_loops = measure_32kHz(watchdog) # Measure frequency
+            except Eception as e:
+                freq_corr = 9999
+                error_in_corr = True
+                print(e)
+            self.rtc.output_32kHz(False) # turn off kHz temperature corrected output from RTC
+            freq_corr = (freq_corr1+freq_corr2)/2
+            data_values.append(freq_corr)
         
         return data_values
 

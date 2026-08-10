@@ -13234,7 +13234,7 @@
 			)
 		)
 	)
-	(gr_text "DS3231MZ"
+	(gr_text "DS3232MZ"
 		(at 148.88 61.5 0)
 		(layer "F.SilkS")
 		(uuid "bcae9eb2-1eed-4117-8ef0-7b2e43ad0d94")

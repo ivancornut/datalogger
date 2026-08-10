@@ -106,7 +106,7 @@ class DendroDialog(SensorDialog):
         main_frame.pack(fill=tk.BOTH, expand=True)
 
         # I2C selection
-        ttk.Label(main_frame, text="I2C Bus:").grid(row=0, column=0, sticky=tk.W, pady=2)
+        ttk.Label(main_frame, text="I2C Bus:", style="Field.TLabel").grid(row=0, column=0, sticky=tk.W, pady=2)
         self.i2c_var = tk.IntVar(value=0)
         i2c_frame = ttk.Frame(main_frame)
         i2c_frame.grid(row=0, column=1, sticky=tk.W, pady=2)
@@ -114,13 +114,13 @@ class DendroDialog(SensorDialog):
         ttk.Radiobutton(i2c_frame, text="1", variable=self.i2c_var, value=1).pack(side=tk.LEFT)
 
         # Address
-        ttk.Label(main_frame, text="Address (decimal, e.g. 72):").grid(row=1, column=0, sticky=tk.W, pady=2)
+        ttk.Label(main_frame, text="Address (decimal, e.g. 72):", style="Field.TLabel").grid(row=1, column=0, sticky=tk.W, pady=2)
         self.address_entry = ttk.Entry(main_frame, width=20)
         self.address_entry.grid(row=1, column=1, sticky=tk.W, pady=2)
         self.address_entry.insert(0, "72")
 
         # Number of dendrometers
-        ttk.Label(main_frame, text="Number (1 or 2):").grid(row=2, column=0, sticky=tk.W, pady=2)
+        ttk.Label(main_frame, text="Number (1 or 2):", style="Field.TLabel").grid(row=2, column=0, sticky=tk.W, pady=2)
         self.number_var = tk.IntVar(value=1)
         number_frame = ttk.Frame(main_frame)
         number_frame.grid(row=2, column=1, sticky=tk.W, pady=2)
@@ -128,7 +128,7 @@ class DendroDialog(SensorDialog):
         ttk.Radiobutton(number_frame,text="2",variable=self.number_var,value=2,command=self.update_dynamic_fields,).pack(side=tk.LEFT)
 
         # Timestep
-        ttk.Label(main_frame, text="Timestep (seconds):").grid(row=3, column=0, sticky=tk.W, pady=2)
+        ttk.Label(main_frame, text="Timestep (seconds):", style="Field.TLabel").grid(row=3, column=0, sticky=tk.W, pady=2)
         self.timestep_entry = ttk.Entry(main_frame, width=20)
         self.timestep_entry.grid(row=3, column=1, sticky=tk.W, pady=2)
         self.timestep_entry.insert(0, "10")
@@ -157,13 +157,13 @@ class DendroDialog(SensorDialog):
             row_frame = ttk.Frame(self.dynamic_frame)
             row_frame.pack(fill=tk.X, pady=2)
 
-            ttk.Label(row_frame, text=f"Dendro {i + 1} Name:").pack(side=tk.LEFT)
+            ttk.Label(row_frame, text=f"Dendro {i + 1} Name:", style="Field.TLabel").pack(side=tk.LEFT)
             name_entry = ttk.Entry(row_frame, width=15)
             name_entry.pack(side=tk.LEFT, padx=5)
             name_entry.insert(0, f"dendro_{i + 1}")
             self.name_entries.append(name_entry)
 
-            ttk.Label(row_frame, text="Excite Pin:").pack(side=tk.LEFT, padx=(10, 0))
+            ttk.Label(row_frame, text="Excite Pin:", style="Field.TLabel").pack(side=tk.LEFT, padx=(10, 0))
             excite_entry = ttk.Entry(row_frame, width=8)
             excite_entry.pack(side=tk.LEFT, padx=5)
             excite_entry.insert(0, str(6 + i))
@@ -214,13 +214,13 @@ class CS616Dialog(SensorDialog):
         main_frame.pack(fill=tk.BOTH, expand=True)
 
         # Number
-        ttk.Label(main_frame, text="Number (0-8):").grid(row=0, column=0, sticky=tk.W, pady=2)
+        ttk.Label(main_frame, text="Number (0-8):", style="Field.TLabel").grid(row=0, column=0, sticky=tk.W, pady=2)
         self.number_spinbox = ttk.Spinbox(main_frame, from_=0, to=8, width=10)
         self.number_spinbox.grid(row=0, column=1, sticky=tk.W, pady=2)
         self.number_spinbox.set(8)
 
         # Control Pins (3 pins)
-        ttk.Label(main_frame, text="Control Pins (3 pins):").grid(row=1, column=0, sticky=tk.W, pady=2)
+        ttk.Label(main_frame, text="Control Pins (3 pins):", style="Field.TLabel").grid(row=1, column=0, sticky=tk.W, pady=2)
         ctrl_frame = ttk.Frame(main_frame)
         ctrl_frame.grid(row=1, column=1, sticky=tk.W, pady=2)
 
@@ -233,26 +233,31 @@ class CS616Dialog(SensorDialog):
             self.ctrl_entries.append(entry)
 
         # Measurement Pin
-        ttk.Label(main_frame, text="Measurement Pin:").grid(row=2, column=0, sticky=tk.W, pady=2)
+        ttk.Label(main_frame, text="Measurement Pin:", style="Field.TLabel").grid(row=2, column=0, sticky=tk.W, pady=2)
         self.meas_entry = ttk.Entry(main_frame, width=10)
         self.meas_entry.grid(row=2, column=1, sticky=tk.W, pady=2)
         self.meas_entry.insert(0, "13")
 
         # Disable Pin
-        ttk.Label(main_frame, text="Disable Pin:").grid(row=3, column=0, sticky=tk.W, pady=2)
+        ttk.Label(main_frame, text="Disable Pin:", style="Field.TLabel").grid(row=3, column=0, sticky=tk.W, pady=2)
         self.enab_entry = ttk.Entry(main_frame, width=10)
         self.enab_entry.grid(row=3, column=1, sticky=tk.W, pady=2)
         self.enab_entry.insert(0, "9")
 
+        # Corrected
+        ttk.Label(main_frame, text="Corrected:", style="Field.TLabel").grid(row=4, column=0, sticky=tk.W, pady=2)
+        self.corrected_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(main_frame, variable=self.corrected_var).grid(row=4, column=1, sticky=tk.W, pady=2)
+
         # Timestep
-        ttk.Label(main_frame, text="Timestep (seconds):").grid(row=4, column=0, sticky=tk.W, pady=2)
+        ttk.Label(main_frame, text="Timestep (seconds):", style="Field.TLabel").grid(row=5, column=0, sticky=tk.W, pady=2)
         self.timestep_entry = ttk.Entry(main_frame, width=10)
-        self.timestep_entry.grid(row=4, column=1, sticky=tk.W, pady=2)
+        self.timestep_entry.grid(row=5, column=1, sticky=tk.W, pady=2)
         self.timestep_entry.insert(0, "10")
 
         # Buttons
         btn_frame = ttk.Frame(main_frame)
-        btn_frame.grid(row=5, column=0, columnspan=2, pady=10)
+        btn_frame.grid(row=6, column=0, columnspan=2, pady=10)
         ttk.Button(btn_frame, text="OK", command=self.ok).pack(side=tk.LEFT, padx=5)
         ttk.Button(btn_frame, text="Cancel", command=self.cancel).pack(side=tk.LEFT, padx=5)
 
@@ -277,6 +282,7 @@ class CS616Dialog(SensorDialog):
                     "ctrlPins": ctrl_pins,
                     "measPin": meas_pin,
                     "disabPin": disab_Pin,
+                    "corrected": bool(self.corrected_var.get()),
                 },
                 "timestep": timestep,
             }
@@ -298,7 +304,7 @@ class SHT45Dialog(SensorDialog):
         main_frame.pack(fill=tk.BOTH, expand=True)
 
         # I2C selection
-        ttk.Label(main_frame, text="I2C Bus:").grid(row=0, column=0, sticky=tk.W, pady=2)
+        ttk.Label(main_frame, text="I2C Bus:", style="Field.TLabel").grid(row=0, column=0, sticky=tk.W, pady=2)
         self.i2c_var = tk.IntVar(value=0)
         i2c_frame = ttk.Frame(main_frame)
         i2c_frame.grid(row=0, column=1, sticky=tk.W, pady=2)
@@ -306,13 +312,13 @@ class SHT45Dialog(SensorDialog):
         ttk.Radiobutton(i2c_frame, text="1", variable=self.i2c_var, value=1).pack(side=tk.LEFT)
 
         # Name
-        ttk.Label(main_frame, text="Sensor Name:").grid(row=1, column=0, sticky=tk.W, pady=2)
+        ttk.Label(main_frame, text="Sensor Name:", style="Field.TLabel").grid(row=1, column=0, sticky=tk.W, pady=2)
         self.name_entry = ttk.Entry(main_frame, width=20)
         self.name_entry.grid(row=1, column=1, sticky=tk.W, pady=2)
         self.name_entry.insert(0, "Outside")
 
         # Timestep
-        ttk.Label(main_frame, text="Timestep (seconds):").grid(row=2, column=0, sticky=tk.W, pady=2)
+        ttk.Label(main_frame, text="Timestep (seconds):", style="Field.TLabel").grid(row=2, column=0, sticky=tk.W, pady=2)
         self.timestep_entry = ttk.Entry(main_frame, width=10)
         self.timestep_entry.grid(row=2, column=1, sticky=tk.W, pady=2)
         self.timestep_entry.insert(0, "10")
@@ -354,13 +360,13 @@ class TMP1826Dialog(SensorDialog):
         main_frame.pack(fill=tk.BOTH, expand=True)
 
         # Measurement Pin
-        ttk.Label(main_frame, text="Measurement Pin:").grid(row=1, column=0, sticky=tk.W, pady=2)
+        ttk.Label(main_frame, text="Measurement Pin:", style="Field.TLabel").grid(row=1, column=0, sticky=tk.W, pady=2)
         self.enab_entry = ttk.Entry(main_frame, width=10)
         self.enab_entry.grid(row=1, column=1, sticky=tk.W, pady=2)
         self.enab_entry.insert(0, "9")
 
          # Timestep
-        ttk.Label(main_frame, text="Timestep (seconds):").grid(row=2, column=0, sticky=tk.W, pady=2)
+        ttk.Label(main_frame, text="Timestep (seconds):", style="Field.TLabel").grid(row=2, column=0, sticky=tk.W, pady=2)
         self.timestep_entry = ttk.Entry(main_frame, width=10)
         self.timestep_entry.grid(row=2, column=1, sticky=tk.W, pady=2)
         self.timestep_entry.insert(0, "10")
@@ -422,39 +428,39 @@ class DataloggerConfigApp:
         info_frame = ttk.LabelFrame(main_frame, text="Device Information", padding="10")
         info_frame.pack(fill=tk.X, pady=(0, 10))
 
-        ttk.Label(info_frame, text="Device Name:").grid(
+        ttk.Label(info_frame, text="Device Name:", style="Field.TLabel").grid(
             row=0, column=0, sticky=tk.W, pady=2
         )
         self.device_name_entry = ttk.Entry(info_frame, width=40)
         self.device_name_entry.grid(row=0, column=1, sticky=tk.W, pady=2, padx=5)
 
-        ttk.Label(info_frame, text="Description:").grid(
+        ttk.Label(info_frame, text="Description:", style="Field.TLabel").grid(
             row=1, column=0, sticky=tk.W, pady=2
         )
         self.description_entry = ttk.Entry(info_frame, width=40)
         self.description_entry.grid(row=1, column=1, sticky=tk.W, pady=2, padx=5)
 
-        ttk.Label(info_frame, text="Named Location:").grid(
+        ttk.Label(info_frame, text="Named Location:", style="Field.TLabel").grid(
             row=2, column=0, sticky=tk.W, pady=2
         )
         self.named_location_entry = ttk.Entry(info_frame, width=40)
         self.named_location_entry.grid(row=2, column=1, sticky=tk.W, pady=2, padx=5)
 
-        ttk.Label(info_frame, text="Latitude:").grid(
+        ttk.Label(info_frame, text="Latitude:", style="Field.TLabel").grid(
             row=3, column=0, sticky=tk.W, pady=2
         )
         self.latitude_entry = ttk.Entry(info_frame, width=20)
         self.latitude_entry.grid(row=3, column=1, sticky=tk.W, pady=2, padx=5)
         self.latitude_entry.insert(0, "9999")
 
-        ttk.Label(info_frame, text="Longitude:").grid(
+        ttk.Label(info_frame, text="Longitude:", style="Field.TLabel").grid(
             row=4, column=0, sticky=tk.W, pady=2
         )
         self.longitude_entry = ttk.Entry(info_frame, width=20)
         self.longitude_entry.grid(row=4, column=1, sticky=tk.W, pady=2, padx=5)
         self.longitude_entry.insert(0, "9999")
 
-        ttk.Label(info_frame, text="Battery resistor real values:").grid(row=5, column=0, sticky=tk.W, pady=2)
+        ttk.Label(info_frame, text="Battery resistor real values:", style="Field.TLabel").grid(row=5, column=0, sticky=tk.W, pady=2)
         self.r1_entry = ttk.Entry(info_frame, width=5)
         self.r1_entry.grid(row=6, column=0, sticky=tk.W, pady=2, padx=5)
         self.r1_entry.insert(0, "22")
@@ -462,6 +468,29 @@ class DataloggerConfigApp:
         self.r2_entry = ttk.Entry(info_frame, width=5)
         self.r2_entry.grid(row=6, column=1, sticky=tk.W, pady=2, padx=5)
         self.r2_entry.insert(0, "68")
+
+        # RTC version selection (mutually exclusive tickboxes sharing one variable)
+        ttk.Label(info_frame, text="RTC version:", style="Field.TLabel").grid(row=7, column=0, sticky=tk.W, pady=2)
+        self.rtc_type_var = tk.StringVar(value="DS3232")
+
+        rtc_frame = ttk.Frame(info_frame)
+        rtc_frame.grid(row=8, column=0, columnspan=2, sticky=tk.W, pady=2, padx=5)
+
+        ttk.Checkbutton(
+            rtc_frame,
+            text="DS3232",
+            variable=self.rtc_type_var,
+            onvalue="DS3232",
+            offvalue="Adafruit",
+        ).pack(side=tk.LEFT, padx=(0, 15))
+
+        ttk.Checkbutton(
+            rtc_frame,
+            text="Adafruit",
+            variable=self.rtc_type_var,
+            onvalue="Adafruit",
+            offvalue="DS3232",
+        ).pack(side=tk.LEFT)
 
         # ===== Add Sensors Section =====
         sensor_btn_frame = ttk.LabelFrame(main_frame, text="Add Sensors", padding="10")
@@ -549,7 +578,8 @@ class DataloggerConfigApp:
             elif sensor_type == "CS616":
                 details = (
                     f"Num:{params['number']}, CtrlPins:{params['ctrlPins']}, "
-                    f"MeasPin:{params['measPin']}, DisabPin:{params['disabPin']}"
+                    f"MeasPin:{params['measPin']}, DisabPin:{params['disabPin']}, "
+                    f"Corrected:{params.get('corrected', False)}"
                 )
             elif sensor_type == "SHT45":
                 i2c = params.get("I2C", 0)
@@ -615,6 +645,7 @@ class DataloggerConfigApp:
             "description": self.description_entry.get().strip(),
             "batt_R1":r1,
             "batt_R2":r2,
+            "rtc_type": self.rtc_type_var.get(),
             "sensors": [],
             "timesteps": [],
         }
@@ -788,14 +819,23 @@ class DataloggerConfigApp:
         self.r2_entry.delete(0, tk.END)
         self.r2_entry.insert(0, config.get("batt_R2", ""))
 
+        rtc_type = config.get("rtc_type", "DS3232")
+        if rtc_type not in ("DS3232", "Adafruit"):
+            rtc_type = "DS3232"
+        self.rtc_type_var.set(rtc_type)
+
         sensors_list = config.get("sensors", [])
         timesteps_list = config.get("timesteps", [])
 
         for i, sensor_data in enumerate(sensors_list):
             timestep = timesteps_list[i] if i < len(timesteps_list) else 10
+            params = dict(sensor_data["params"])
+            # Older config files predate the CS616 "corrected" option
+            if sensor_data["type"] == "CS616":
+                params.setdefault("corrected", False)
             sensor = {
                 "type": sensor_data["type"],
-                "params": sensor_data["params"],
+                "params": params,
                 "timestep": timestep,
             }
             self.sensors.append(sensor)
@@ -1273,6 +1313,18 @@ style = ttk.Style()
 style.theme_use('clam')
 style.configure('TButton', font=('Helvetica', 12,'bold'), foreground = "dark green",padding = 7.5, background = "light yellow")
 style.configure('TLabel', font=('Helvetica', 12),relief = "sunken", padding = 5, background = "white")
+
+# Field prompt labels ("Latitude:", "RTC version:", ...): no sunken white box,
+# just slightly larger bold text on the normal frame background.
+_field_label_bg = style.lookup('TFrame', 'background') or root.cget('background')
+style.configure(
+    'Field.TLabel',
+    font=('Helvetica', 13, 'bold'),
+    relief='flat',
+    borderwidth=0,
+    padding=(0, 3),
+    background=_field_label_bg,
+)
 
 # Critical — tell the parent columns to stretch:
 root.columnconfigure(0, weight=1)

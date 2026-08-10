@@ -6,6 +6,7 @@ import sdcard
 import vfs
 import os
 from ds3231 import DS3231
+import urtc
 
 class datalogger:
     """ A datalogger class to be used with any sensors
@@ -34,8 +35,16 @@ class datalogger:
             self.file_prefix = config["device_name"]
             self.sensors = config["sensors"]
             self.timesteps = config["timesteps"]
-            batt_r1 = float(config["batt_R1"])
-            batt_r2 = float(config["batt_R2"])
+            if "batt_R1" in config:
+                batt_r1 = float(config["batt_R1"])
+                batt_r2 = float(config["batt_R2"])
+            else:
+                batt_r1 = 22
+                batt_r2 = 68
+            if "rtc_type" in config: # to account for older versions of datalogger using the adafruit shield
+                self.rtc_type = config["rtc_type"]
+            else:
+                self.rtc_type = "DS3232"
 
         except Exception as e:
             print(e)
@@ -47,7 +56,6 @@ class datalogger:
             self.blink_status(status="major_err")
             deepsleep(30*60*1000)
             
-        
         self.battery_pin = ADC(26)
         self.voltage_drop_factor = 1/(batt_r1/(batt_r2+batt_r1))
         
@@ -69,11 +77,16 @@ class datalogger:
             self.blink_status(status="major_err") # Blink to indicate issue to user
             deepsleep(30*60*1000)
         try:
-            self.i2c_clock = I2C(0, sda=Pin(4), scl=Pin(5))  # Correct I2C pins for RP2040
-            self.i2c_0_used = True
-            self.rtc = DS3231(self.i2c_clock) # for time
-            sleep(0.2)
-            self.rtc.output_32kHz(False)
+            if self.rtc_type = "DS3232":
+                self.i2c_clock = I2C(0,scl=Pin(5), sda=Pin(4))  # Correct I2C pins for RP2040
+                self.i2c_0_used = True
+                self.rtc = DS3231(self.i2c_clock) # for time
+                sleep(0.2)
+                self.rtc.output_32kHz(False)
+            else:
+                self.i2c_clock = I2C(0,scl=Pin(5), sda=Pin(4))
+                self.rtc = urtc.PCF8523(self.i2c_clock)
+                self.i2c_0_used = True     
         except Exception as e:
             print("Error in RTC setup:")
             print(e)
@@ -178,8 +191,11 @@ class datalogger:
         # !!! Campbell CS616 soil humidity probes !!!
         if sensor_name == "CS616": 
             p = sensor["params"]
+            if "corrected" in p:
+                if p["corrected"] == 1:
+                    return sensor_class.TDR_CS616(nb_cs616=p["number"], meas_pin=p["measPin"],ctrl_pins = p["ctrlPins"], disable_pin = p["disabPin"],corrected = True,rtc = self.rtc)
             return sensor_class.TDR_CS616(nb_cs616=p["number"], meas_pin=p["measPin"],ctrl_pins = p["ctrlPins"], disable_pin = p["disabPin"])
-            
+        
         # !!! Fine Open dendros on ADS1115 !!!
         elif sensor_name == "dendro": 
             p = sensor["params"]
@@ -230,12 +246,21 @@ class datalogger:
             return None
         else:
             datetime = self.rtc.datetime() # check date
-            year = datetime[0]
-            month = datetime[1]
-            day = datetime[2]
-            hour = datetime[4]
-            minute = datetime[5]
-            second = datetime[6]
+            if self.rtc_type = "DS3232":
+                year = datetime[0]
+                month = datetime[1]
+                day = datetime[2]
+                hour = datetime[4]
+                minute = datetime[5]
+                second = datetime[6]
+            else:
+                year = datetime.year
+                month = datetime.month
+                day = datetime.day
+                hour = datetime.hour
+                minute = datetime.minute
+                second = datetime.second
+                
             local_filename = self.file_prefix+'_'+str(year)+"-"+str(month)+"-"+str(day)+".csv"
             if test:
                 self.filename = "test.csv"
@@ -293,8 +318,13 @@ class datalogger:
         self.interval_minutes = self.interval // 60
         while True:
             datetime = self.rtc.datetime() # check the datetime
-            hour = datetime[4]
-            minute = datetime[5]
+            if self.rtc_type == "DS3232":
+                hour = datetime[4]
+                minute = datetime[5]
+            else:
+                hour = datetime.hour
+                minute = datetime.minute
+
             if self.usb_pin():
                 self.read_internal_temperature()
                 # if connected to usb do not sleep
