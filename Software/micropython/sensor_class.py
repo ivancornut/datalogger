@@ -125,13 +125,15 @@ class temp_hum_sht45:
         return data_values
     
 class TDR_CS616:
-    def __init__(self, nb_cs616=8, meas_pin=11,ctrl_pins = [6,7,8], disable_pin=9,corrected=False,rtc=None):
+    def __init__(self, nb_cs616=8, meas_pin=11,ctrl_pins = [6,7,8], disable_pin=9,reps=5,corrected=False,rtc=None):
         #self.enable_Pin = Pin(enable_pin,Pin.OUT) # Pin to enable sensors with 5V
         #self.enable_Pin.value(0)
         self.disable_Pin = Pin(disable_pin,Pin.OUT) # Pin to disable sensors with 5V
         self.disable_Pin.value(1) # turn ON to disable
         
         self.switch_control = CD4051.CD4051(ctrl_pins[0],ctrl_pins[1],ctrl_pins[2]) # control of the first CD4051 switch
+        
+        self.reps = reps  # number of repetitions
         
         # create the column names for each sensor
         self.column_names = []
@@ -169,7 +171,7 @@ class TDR_CS616:
         while outlier:
             ind_freqs = []
             mean_freq = 0
-            for i in range(1,11):
+            for i in range(0,self.reps):
                 cond = True
                 last_check = ticks_us()
                 self.pin_counter.start()
@@ -177,7 +179,7 @@ class TDR_CS616:
                     if ticks_diff(tmp := ticks_us(), last_check) >= sampling_time:
                         freq = self.pin_counter.read_and_reset() / (sampling_time / 1000000)
                         ind_freqs.append(freq)
-                        mean_freq = mean_freq + (freq)/10
+                        mean_freq = mean_freq + (freq)/self.reps
                         cond = False
                 self.pin_counter.stop()
                 self.pin_counter.reset()
@@ -211,7 +213,7 @@ class TDR_CS616:
         while outlier:
             ind_freqs = []
             mean_freq = 0
-            for i in range(1,11):
+            for i in range(0,self.reps):
                 cond = True
                 last_check = ticks_us()
                 self.pin_counter.start()
@@ -219,7 +221,7 @@ class TDR_CS616:
                     if ticks_diff(tmp := ticks_us(), last_check) >= sampling_time:
                         freq = self.pin_counter.read_and_reset() / (sampling_time / 1000000)
                         ind_freqs.append(freq)
-                        mean_freq = mean_freq + (freq)/10
+                        mean_freq = mean_freq + (freq)/self.reps
                         cond = False
                 self.pin_counter.stop()
                 self.pin_counter.reset()
