@@ -44,7 +44,7 @@ class datalogger:
             if "rtc_type" in config: # to account for older versions of datalogger using the adafruit shield
                 self.rtc_type = config["rtc_type"]
             else:
-                self.rtc_type = "DS3232"
+                self.rtc_type = "Adafruit"
 
         except Exception as e:
             print(e)
@@ -77,15 +77,15 @@ class datalogger:
             self.blink_status(status="major_err") # Blink to indicate issue to user
             deepsleep(30*60*1000)
         try:
-            if self.rtc_type = "DS3232":
-                self.i2c_clock = I2C(0,scl=Pin(5), sda=Pin(4))  # Correct I2C pins for RP2040
-                self.i2c_0_used = True
-                self.rtc = DS3231(self.i2c_clock) # for time
+            if self.rtc_type == "DS3232":
+                self.I2C_0_obj = I2C(0,scl=Pin(5), sda=Pin(4))  # Correct I2C pins for RP2040
+                self.I2C_0_used = True
+                self.rtc = DS3231(self.I2C_0_obj) # for time
                 sleep(0.2)
                 self.rtc.output_32kHz(False)
             else:
-                self.i2c_clock = I2C(0,scl=Pin(5), sda=Pin(4))
-                self.rtc = urtc.PCF8523(self.i2c_clock)
+                self.I2C_0_obj = I2C(0,scl=Pin(5), sda=Pin(4))
+                self.rtc = urtc.PCF8523(self.I2C_0_obj)
                 self.i2c_0_used = True     
         except Exception as e:
             print("Error in RTC setup:")
@@ -97,13 +97,16 @@ class datalogger:
         self.sensor_objs = []
         print(self.sensors)
         for s in self.sensors:
-            self.sensor_objs.append(self.create_sensor(s))
+            obj = self.create_sensor(s)
+            if obj is None:
+                print("Unknown or misconfigured sensor:", s)
+            else:
+                self.sensor_objs.append(obj)
         
         # the sensor objects will output the corresponding columns
         for sensor in self.sensor_objs:
             if sensor.exists:
                 self.column_names = self.column_names + sensor.column_names
-            
          
         # check if all timesteps are equal:
         val = self.timesteps[0]
@@ -191,9 +194,10 @@ class datalogger:
         # !!! Campbell CS616 soil humidity probes !!!
         if sensor_name == "CS616": 
             p = sensor["params"]
-            if "corrected" in p:
-                if p["corrected"] == 1:
-                    return sensor_class.TDR_CS616(nb_cs616=p["number"], meas_pin=p["measPin"],ctrl_pins = p["ctrlPins"], disable_pin = p["disabPin"],corrected = True,rtc = self.rtc)
+            if self.rtc_type == "DS3232":
+                if "corrected" in p:
+                    if p["corrected"] == 1:
+                        return sensor_class.TDR_CS616(nb_cs616=p["number"], meas_pin=p["measPin"],ctrl_pins = p["ctrlPins"], disable_pin = p["disabPin"],corrected = True,rtc = self.rtc)
             return sensor_class.TDR_CS616(nb_cs616=p["number"], meas_pin=p["measPin"],ctrl_pins = p["ctrlPins"], disable_pin = p["disabPin"])
         
         # !!! Fine Open dendros on ADS1115 !!!
@@ -224,11 +228,6 @@ class datalogger:
                     self.i2c_1_used = True
                 return  sensor_class.temp_hum_sht45(self.I2C_1_obj, name = p["name"])
         
-        # !!! DS18B20 !!!    
-        elif sensor_name == "temp_sensor":
-            p = sensor["params"]
-            return sensor_class.temp_DS18B20(meas_pin=p[0],roms = p[1])
-        
         # !!! TMP1826 temperature sensor !!!
         elif sensor_name == "TMP1826":
             p = sensor["params"]
@@ -240,54 +239,63 @@ class datalogger:
         self.read_battery_voltage()
         self.read_internal_temperature()
         
-        vfs.mount(self.filsys, "/sd") # mount the SD card
-        if self.multi_files:
-            vfs.umount("/sd")
-            return None
-        else:
-            datetime = self.rtc.datetime() # check date
-            if self.rtc_type = "DS3232":
-                year = datetime[0]
-                month = datetime[1]
-                day = datetime[2]
-                hour = datetime[4]
-                minute = datetime[5]
-                second = datetime[6]
+        vfs.mount(self.filsys, "/sd") # mount the SD card7
+        try:
+            if self.multi_files:
+                return None
             else:
-                year = datetime.year
-                month = datetime.month
-                day = datetime.day
-                hour = datetime.hour
-                minute = datetime.minute
-                second = datetime.second
+                datetime = self.rtc.datetime() # check date
+                if self.rtc_type == "DS3232":
+                    year = datetime[0]
+                    month = datetime[1]
+                    day = datetime[2]
+                    hour = datetime[4]
+                    minute = datetime[5]
+                    second = datetime[6]
+                else:
+                    year = datetime.year
+                    month = datetime.month
+                    day = datetime.day
+                    hour = datetime.hour
+                    minute = datetime.minute
+                    second = datetime.second
                 
-            local_filename = self.file_prefix+'_'+str(year)+"-"+str(month)+"-"+str(day)+".csv"
-            if test:
-                self.filename = "test.csv"
-            else:
-                self.filename = "/sd/"+local_filename
-            if not local_filename in os.listdir('/sd'):
-                # create the header of the file
+                local_filename = self.file_prefix+'_'+str(year)+"-"+str(month)+"-"+str(day)+".csv"
+                if test:
+                    self.filename = "test.csv"
+                    if not "test.csv" in os.listdir('/'):
+                        # create the header of the file
+                        with open(self.filename,'a') as f:
+                            f.write("DateTime")
+                            for i in self.column_names:
+                                f.write(",")
+                                f.write(i)
+                            f.write("\n")    
+                else:
+                    self.filename = "/sd/"+local_filename
+                    if not local_filename in os.listdir('/sd'):
+                        # create the header of the file
+                        with open(self.filename,'a') as f:
+                            f.write("DateTime")
+                            for i in self.column_names:
+                                f.write(",")
+                                f.write(i)
+                            f.write("\n")    
                 with open(self.filename,'a') as f:
-                    f.write("DateTime")
-                    for i in self.column_names:
-                        f.write(",")
-                        f.write(i)
-                    f.write("\n")    
-            with open(self.filename,'a') as f:
-                # append the file with the newline of data
-                f.write(f"{year:04d}-{month:02d}-{day:02d}T{hour:02d}:{minute:02d}:{second:02d}")
-                f.write(",")
-                f.write(f"%1.2f" % self.battery_voltage)
-                f.write(",")
-                f.write(f"%1.1f" % self.internal_temp)
-                for sv in sensor_values:
-                    for v in sv:
-                        f.write(",")
-                        f.write("%1.4f" % v)
-                f.write("\n")
+                    # append the file with the newline of data
+                    f.write(f"{year:04d}-{month:02d}-{day:02d}T{hour:02d}:{minute:02d}:{second:02d}")
+                    f.write(",")
+                    f.write(f"%1.2f" % self.battery_voltage)
+                    f.write(",")
+                    f.write(f"%1.1f" % self.internal_temp)
+                    for sv in sensor_values:
+                        for v in sv:
+                            f.write(",")
+                            f.write("%1.4f" % v)
+                    f.write("\n")
+        finally:
             vfs.umount("/sd") # unmount the SD card
-            self.watchdog.feed()
+        self.watchdog.feed()
     
     def _display_batt(self):
         if self.battery_voltage > 12.6:
@@ -346,7 +354,6 @@ class datalogger:
                                 values.append(sensor.read_values(self.watchdog,self.led))
                             self.watchdog.feed()
                         self._write_file(values)
-                    else:
                         for i in range(0,10):
                             self.watchdog.feed()
                             lightsleep(6000)
@@ -361,12 +368,12 @@ class datalogger:
                     
                     # Then sleep to keep energy
                     for i in range(0,6*self.interval_minutes):
-                        lightsleep(7000)
+                        lightsleep(6500)
                         self.watchdog.feed()
                         self._display_batt()
                 else:
                     for i in range(0,4):
-                        lightsleep(7000)
+                        lightsleep(6500)
                         self.watchdog.feed()
                         self._display_batt()
                     

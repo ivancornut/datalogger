@@ -54,7 +54,7 @@ class temp_tmp1826:
         except Exception as e:
             print("Error in initialising tmp1826 sensor")
             self.column_names = []
-            self.sensor_ditc = {}
+            self.sensor_dict = {}
             print(e)
             self.exists = False
         
@@ -76,7 +76,8 @@ class temp_tmp1826:
                     print("Error for this sensor")
                     print(e)
                     data_values.append(9999)
-                sleep(0.1)
+                sleep(0.05)
+                watchdog.feed()
             return data_values
         except Exception as e:
             print("Major error in tmp1826 loop:")
@@ -84,49 +85,6 @@ class temp_tmp1826:
             for i in self.roms:
                 data_values.append(9999)
             return data_values
-                    
-class temp_DS18B20:
-    def __init__(self,meas_pin=12,roms={7: bytearray(b'(\xac`TB \x01\x19'), 6 : bytearray(b'(*n\xf1B \x01\xcb')}):
-        self.exists = True
-        try:
-            self.dat_pin = Pin(meas_pin)
-            self.ds = ds18x20.DS18X20(onewire.OneWire(self.dat_pin))
-            self.roms = roms # a dictionnary with sensor number and roms
-            self.column_names = []
-        except Exception as e:
-            self.exists = False
-            self.roms = roms # a dictionnary with sensor number and roms
-            self.column_names = []
-            with open('logs.txt','a') as f:
-                f.write("Error initialising ds18B20:")
-                f.write(str(e))
-                f.write("\n")
-        for key, value in self.roms.items():
-            self.column_names.append("Temp_"+str(key))
-        self.error = False
-        self.total_error = False
-            
-    def read_values(self,watchdog,internal_led, debug = False):
-        data_values = []
-        self.ds.convert_temp()
-        sleep(1)
-        for key, value in self.roms.items():
-            try:
-                temp = self.ds.read_temp(value)
-            except Exception as e:
-                temp = 9999
-                if not self.error:
-                    with open('logs.txt','a') as f:
-                        f.write("Error read temp ds18b20:")
-                        f.write(str(e))
-                        f.write("\n")
-                    self.error = True
-            data_values.append(temp)
-            internal_led.value(1)
-            sleep(0.05)
-            internal_led.value(0)
-            watchdog.feed()
-        return data_values
         
 class temp_hum_sht45:    
     def __init__(self,i2c_obj, name="SHT45"):
@@ -240,7 +198,7 @@ class TDR_CS616:
         
         return period, std_freq, stop_loop
     
-    def measure_32kHz(watchdog):
+    def measure_32kHz(self,watchdog):
         ''' Measure the 32.768 kHz frequency of RTC'''
         sampling_time = 100000
         mean_freq = 0
@@ -272,7 +230,7 @@ class TDR_CS616:
                 mean_freq = 0
                 outlier = False
             watchdog.feed()
-        return period, std_freq, stop_loop    
+        return mean_freq, std_freq, stop_loop    
     
     def _convert_period_to_wc(self,period_value):
         # this function is given in the manual of the CS616
@@ -295,10 +253,10 @@ class TDR_CS616:
             self.rtc.output_32kHz(True) # turn on kHz temperature corrected output from RTC
             sleep(0.1)
             try:
-                freq_corr1, std_freq_meas,nb_loops = measure_32kHz(watchdog) # Measure frequency
-            except:
-                freq_corr = 9999
-                error_in_corr = True
+                freq_corr1, std_freq_meas,nb_loops = self.measure_32kHz(watchdog) # Measure frequency
+            except Exception as e:
+                freq_corr1 = 9999
+                print(e)
             self.rtc.output_32kHz(False) # turn off kHz temperature corrected output from RTC
         
         for i in range(0,self.number):
@@ -345,13 +303,17 @@ class TDR_CS616:
             self.rtc.output_32kHz(True) # turn on kHz temperature corrected output from RTC
             sleep(0.1)
             try:
-                freq_corr2, std_freq_meas,nb_loops = measure_32kHz(watchdog) # Measure frequency
-            except Eception as e:
-                freq_corr = 9999
-                error_in_corr = True
+                freq_corr2, std_freq_meas,nb_loops = self.measure_32kHz(watchdog) # Measure frequency
+            except Exception as e:
+                freq_corr2 = 9999
                 print(e)
             self.rtc.output_32kHz(False) # turn off kHz temperature corrected output from RTC
-            freq_corr = (freq_corr1+freq_corr2)/2
+            
+            if freq_corr1 == 0 or freq_corr2 == 0 or freq_corr1 == 9999 or freq_corr2 == 9999:
+                print("Error in reading RTC 32kHz output")
+                freq_corr = 9999
+            else:
+                freq_corr = (freq_corr1 + freq_corr2)/2
             data_values.append(freq_corr)
         
         return data_values
