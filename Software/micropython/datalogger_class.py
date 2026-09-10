@@ -29,6 +29,11 @@ class datalogger:
         else:
             self.blink_status("start_ok")
         
+         ### Watchdog ###
+        """ The watchdog will reset the device if execution stops for whatever reason
+        this is useful since bugs or unexpected errors can happen """
+        self.watchdog = WDT(timeout=8000)
+        
         try:
             with open('info.json','r') as f:
                 config = json.load(f)
@@ -41,6 +46,7 @@ class datalogger:
             else:
                 batt_r1 = 22
                 batt_r2 = 68
+            
             if "rtc_type" in config: # to account for older versions of datalogger using the adafruit shield
                 self.rtc_type = config["rtc_type"]
             else:
@@ -54,8 +60,23 @@ class datalogger:
                 f.write("\n")
             self.blink_status("no_info_file")
             self.blink_status(status="major_err")
-            deepsleep(30*60*1000)
-            
+            lightsleep(6500)
+        
+        # create the sensor objects
+        self.sensor_objs = []
+        print(self.sensors)
+        for s in self.sensors:
+            try:
+                obj = self.create_sensor(s)
+                if obj is None:
+                    print("Unknown or misconfigured sensor:", s)
+                else:
+                    self.sensor_objs.append(obj)
+            except Exception as e:
+                print("Error in creating sensor")
+                print(e)
+        
+        self.watchdog.feed()
         self.battery_pin = ADC(26)
         self.voltage_drop_factor = 1/(batt_r1/(batt_r2+batt_r1))
         
@@ -75,7 +96,11 @@ class datalogger:
             print("Error in SD card setup:")
             print(e)
             self.blink_status(status="major_err") # Blink to indicate issue to user
-            deepsleep(30*60*1000)
+            with open('logs.txt','a') as f:
+                f.write("Error in SD card setup")
+                f.write(str(e))
+                f.write("\n")
+            lightsleep(8500)
         try:
             if self.rtc_type == "DS3232":
                 self.I2C_0_obj = I2C(0,scl=Pin(5), sda=Pin(4))  # Correct I2C pins for RP2040
@@ -91,17 +116,14 @@ class datalogger:
             print("Error in RTC setup:")
             print(e)
             self.blink_status(status="major_err") # Blink to indicate issue to user
-            deepsleep(30*60*1000)
+            with open('logs.txt','a') as f:
+                f.write("Error in RTC setup")
+                f.write(str(e))
+                f.write("\n")
+            lightsleep(8500)
+            reset()
+        self.watchdog.feed()
         
-        # create the sensor objects
-        self.sensor_objs = []
-        print(self.sensors)
-        for s in self.sensors:
-            obj = self.create_sensor(s)
-            if obj is None:
-                print("Unknown or misconfigured sensor:", s)
-            else:
-                self.sensor_objs.append(obj)
         
         # the sensor objects will output the corresponding columns
         for sensor in self.sensor_objs:
@@ -116,8 +138,10 @@ class datalogger:
         if len(set(self.timesteps)) > 1:
             self.blink_status(status="major_err") # Blink to indicate issue to user
             print("Mixed timesteps not yet supported")
-            deepsleep(30*60*1000)
+            lightsleep(6000)
+            reset()
         
+        self.watchdog.feed()
         if self.different_timesteps:
             # this is experimental does not work for now
             # Here we see if we need timers or rather to use the RTC for time intervall
@@ -141,12 +165,7 @@ class datalogger:
                 self.is_timer = True
             else:
                 self.interval = val
-                
-         ### Watchdog ###
-        """ The watchdog will reset the device if execution stops for whatever reason
-        this is useful since bugs or unexpected errors can happen """
-        self.watchdog = WDT(timeout=8000)
-        
+                self.watchdog.feed()
     
     def blink_status(self, status):
         if status=="start_ok":
@@ -162,7 +181,7 @@ class datalogger:
                 sleep(0.3)
                 self.led.value(0)
         elif status=="USB_conn":
-            for i in range(0,2):
+            for i in range(0,6):
                 sleep(1)
                 self.led.toggle()
                 sleep(0.3)

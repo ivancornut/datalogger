@@ -1043,7 +1043,10 @@ def get_device_time():
             seconds = int(numbers[-1])
             minutes = int(numbers[-2])
             hours = int(numbers[-3])
-            formatted_time = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+            days = int(numbers[-4])
+            month = int(numbers[-5])
+            year = int(numbers[-6])
+            formatted_time = f"{year:04d}-{month:02d}-{days:02d} {hours:02d}:{minutes:02d}:{seconds:02d}"
             device_time_output.config(text=f"Device Time:\n{formatted_time}")
         else:
             device_time_output.config(text=f"Device Time:\n{result.stdout.strip()}")

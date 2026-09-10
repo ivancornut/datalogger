@@ -57,10 +57,10 @@ class temp_tmp1826:
             self.sensor_dict = {}
             print(e)
             self.exists = False
-        
+
         self.error = False
         self.total_error = False
-        
+
     def read_values(self,watchdog,internal_led, debug = False):
         data_values = []
         try:
@@ -85,8 +85,8 @@ class temp_tmp1826:
             for i in self.roms:
                 data_values.append(9999)
             return data_values
-        
-class temp_hum_sht45:    
+
+class temp_hum_sht45:
     def __init__(self,i2c_obj, name="SHT45"):
         self.error = False
         self.i2c_obj = i2c_obj
@@ -102,7 +102,7 @@ class temp_hum_sht45:
                 f.write("\n")
             print("Major Error in init SHT45")
         self.column_names  = [name+"_T_air",name+"_RH_air"]
-    
+
     def read_values(self,watchdog, internal_led, debug = False):
         data_values = []
         try:
@@ -121,41 +121,41 @@ class temp_hum_sht45:
         data_values.append(relative_humidity)
         watchdog.feed()
         print("SHT45 data:",data_values)
-        
+
         return data_values
-    
+
 class TDR_CS616:
     def __init__(self, nb_cs616=8, meas_pin=11,ctrl_pins = [6,7,8], disable_pin=9,reps=5,corrected=False,rtc=None):
         #self.enable_Pin = Pin(enable_pin,Pin.OUT) # Pin to enable sensors with 5V
         #self.enable_Pin.value(0)
         self.disable_Pin = Pin(disable_pin,Pin.OUT) # Pin to disable sensors with 5V
         self.disable_Pin.value(1) # turn ON to disable
-        
+
         self.switch_control = CD4051.CD4051(ctrl_pins[0],ctrl_pins[1],ctrl_pins[2]) # control of the first CD4051 switch
-        
-        self.reps = reps  # number of repetitions
-        
+
+        self.reps = reps # number of repetitions
+
         # create the column names for each sensor
         self.column_names = []
         for i in range(0,nb_cs616):
             self.column_names.append("TDR"+str(i)+"_us")
             self.column_names.append("TDR"+str(i)+"_WC%")
-        # handle the frequency counting Pin 
+        # handle the frequency counting Pin
         self.pin_counter = PWMCounter(meas_pin, PWMCounter.EDGE_RISING)
         self.pin_counter.set_div() # Set divisor to 1 (just in case)
         self.pin_counter.start() # Start counter
         self.pin_counter.stop() # Stop counter
-        
+
         self.exists = True # allways exists since no way to check
-        
+
         self.number = nb_cs616
         self.corrected = corrected
-        
+
         if corrected:
             self.rtc = rtc
             self.rtc.output_32kHz(False)
             self.column_names.append("32kHz_correction")
-        
+
     def _cs616_measure(self, watchdog):
         ''' The frequency measuring function
         the period of the CS616 is then used to deduce soil
@@ -164,10 +164,10 @@ class TDR_CS616:
         mean_freq = 0
         self.pin_counter.stop()
         self.pin_counter.reset()
-        
+
         outlier = True # to see if there is a major discrepancy between meass
-        stop_loop = 0 
-        
+        stop_loop = 0
+
         while outlier:
             ind_freqs = []
             mean_freq = 0
@@ -190,26 +190,26 @@ class TDR_CS616:
                 mean_freq = 0
                 outlier = False
             watchdog.feed()
-        
+
         if mean_freq>100:
             period = 1/mean_freq * 1000000 # in us
             if period < 12 or period > 50:
                 period = 9999
         else:
             period = 9999
-        
+
         return period, std_freq, stop_loop
-    
+
     def measure_32kHz(self,watchdog):
         ''' Measure the 32.768 kHz frequency of RTC'''
         sampling_time = 100000
         mean_freq = 0
         self.pin_counter.stop()
         self.pin_counter.reset()
-        
+
         outlier = True # to see if there is a major discrepancy between meass
-        stop_loop = 0 
-        
+        stop_loop = 0
+
         while outlier:
             ind_freqs = []
             mean_freq = 0
@@ -232,23 +232,23 @@ class TDR_CS616:
                 mean_freq = 0
                 outlier = False
             watchdog.feed()
-        return mean_freq, std_freq, stop_loop    
-    
+        return mean_freq, std_freq, stop_loop
+
     def _convert_period_to_wc(self,period_value):
         # this function is given in the manual of the CS616
         VW=(-0.0663 + (-0.0063*period_value)+(0.0007*period_value**2))*100
         if (VW>80):
             VW = 9999
         return VW
-    
+
     def turn_off(self):
         #self.enable_Pin.value(0)
         self.disable_Pin.value(1)
-        
+
     def read_values(self,watchdog,internal_led, debug = False):
         data_values = []
         error_in_corr = False
-        
+
         ### Correction 1:
         if self.corrected:
             self.disable_Pin.value(1) # make sure we are not receiving any CS616 data
@@ -260,7 +260,7 @@ class TDR_CS616:
                 freq_corr1 = 9999
                 print(e)
             self.rtc.output_32kHz(False) # turn off kHz temperature corrected output from RTC
-        
+
         for i in range(0,self.number):
             self.switch_control.set_output(i)
             #self.enable_Pin.value(1)
@@ -282,22 +282,22 @@ class TDR_CS616:
                 value_1 = 9999
                 value_2 = 9999
                 print("Error: ",e)
-            
+
             self.disable_Pin.value(1)
             #self.enable_Pin.value(0)
-            
+
             data_values.append(value_1)
             data_values.append(value_2)
-            
+
             watchdog.feed()
-            
+
             internal_led.value(1)
             sleep(0.1)
             internal_led.value(0)
-        
+
         self.switch_control.set_output(0) # go back to first position to avoid pin getting stuck
         self.disable_Pin.value(1)
-        
+
         ### Frequency Correction 2:
         if self.corrected:
             self.disable_Pin.value(1) # make sure we are not receiving any CS616 data
@@ -310,14 +310,14 @@ class TDR_CS616:
                 freq_corr2 = 9999
                 print(e)
             self.rtc.output_32kHz(False) # turn off kHz temperature corrected output from RTC
-            
+
             if freq_corr1 == 0 or freq_corr2 == 0 or freq_corr1 == 9999 or freq_corr2 == 9999:
                 print("Error in reading RTC 32kHz output")
                 freq_corr = 9999
             else:
                 freq_corr = (freq_corr1 + freq_corr2)/2
             data_values.append(freq_corr)
-        
+
         return data_values
 
 class dendrometer:
@@ -327,11 +327,11 @@ class dendrometer:
         self.addr = addr
         self.gain = 1
         self.exists = True
-        
+
         if len(on_pins) != nb_dendros:
             print("Mismatch between dendro number and excitation pin number")
             self.exists = False
-        
+
         self.excite_pins = []
         try:
             c = 0
@@ -342,7 +342,7 @@ class dendrometer:
         except Exception as e:
             print("Error in selecting excite pins")
             self.exists = False
-        try:    
+        try:
             self.ads = ads1x15.ADS1115(i2c_obj, addr, self.gain)
         except Exception as e:
             print(e)
@@ -351,7 +351,7 @@ class dendrometer:
                 f.write(str(e))
                 f.write("\n")
             self.exists = False
-        
+
         self.nb_dendros = nb_dendros
         if self.nb_dendros == 1:
             self.column_names = [names[0]+"_raw_1",names[0]+"_raw_2",names[0]+"_ratio"]
@@ -362,7 +362,7 @@ class dendrometer:
             self.column_names = None
             self.exists = False
             print("Error too many dendros on same ADC")
-            
+
     def read_values(self,watchdog,internal_led, debug = False):
         data_values = []
         try:
@@ -383,7 +383,7 @@ class dendrometer:
                 data_values.append(value2)
                 ratio = value2/value1 if value1 != 0 else 9999
                 data_values.append(ratio)
-                    
+
         except Exception as e:
             print(e)
             if not self.error:
@@ -397,13 +397,13 @@ class dendrometer:
             else:
                 data_values = [9999,9999,9999]
             self.error = True
-            
+
         for n in range(0,self.nb_dendros):
             self.excite_pins[n].value(0) # make sure the activation pin is off
-            
+
         watchdog.feed() # feed the watchdog of the datalogger class
         internal_led.value(0)
-        
+
         print("Dendro data:",data_values)
-        
+
         return data_values
