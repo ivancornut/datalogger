@@ -1,7 +1,17 @@
-# Open Ecophysio Datalogger
-A comptetitive datalogger for use in environmental science. It is adapted to situtation in remote locations with little access to networks.
+# Open Ecophysio Dataloggers
+A competitive datalogger for use in environmental science. It is well adapted for work in remote locations with little access to networks. 
 
-The interfacing software is compatible with windows, macOS and linux computers. 
+The big version of the datalogger is made to run on 12 or 24V lead batteries. This version has options to switch 12V or 5V loads.
+
+The small version can run on 3 or 4 AA NiMh cells. It is made in a way that ensures very low consumption during sleep (few µAs). This gurantees around a year of logging before needing a battery change. 
+
+Both versions have:
+- a micro-SD card slot
+- a very low-drift RTC for precise time-keeping
+- battery voltage monitoring
+- polarity and over-current protection
+
+The interfacing software is compatible with windows, macOS and linux computers. It is made to be as simple to use as possible.
 
   * [Hardware](#hardware)
     + [Full size datalogger](#full-size-datalogger)
@@ -24,8 +34,8 @@ We use a custom made PCB that integrates
 - A way to measure input battery voltage
 ### Micro sized datalogger
 ![3D rendering of datalogger PCB](micro_datalogger_pcb.png)
-This is a miniaturised version of the big pcb when size is a constraint. It pushed all the power and clock circuitry beneath the Pi Pico.
-It lacks some functionnality of the bigger version such as the controllable power outputs and the full shutdown circuitry. 
+This is a miniaturized version of the big pcb when size is a constraint. It pushed all the power and clock circuitry beneath the Pi Pico.
+It lacks some functionality of the bigger version such as the controllable power outputs and the full shutdown circuitry. 
 
 ## Software
 ### On the computer
