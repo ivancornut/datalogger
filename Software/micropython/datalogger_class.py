@@ -1,4 +1,4 @@
-from machine import Pin, PWM, Timer,I2C,lightsleep,WDT, idle, ADC,SPI, reset, deepsleep
+from machine import Pin, PWM, Timer,I2C,lightsleep,WDT, idle, ADC,SPI, reset, deepsleep, disable_irq, enable_irq
 from time import sleep
 import sensor_class
 import json
@@ -18,8 +18,8 @@ class datalogger:
         self.led.value(0)
         
         self.testing = False
-        self.i2c_0_used = False # This is to know whether to initialise the I2C ports
-        self.i2c_1_used = False # This is to know whether to initialise the I2C ports
+        self.I2C_0_used = False # This is to know whether to initialise the I2C ports
+        self.I2C_1_used = False # This is to know whether to initialise the I2C ports
         
         self.usb_pin = Pin(24, Pin.IN) # identifies if Pi Pico is plugged into a computer
         
@@ -28,6 +28,8 @@ class datalogger:
             sleep(8) # time for the reset before setting the watchdog
         else:
             self.blink_status("start_ok")
+            self.usb_pin.irq(handler = self.reset_datalogger, trigger=self.usb_pin.IRQ_RISING, hard=True)
+            
         
          ### Watchdog ###
         """ The watchdog will reset the device if execution stops for whatever reason
@@ -61,6 +63,30 @@ class datalogger:
             self.blink_status("no_info_file")
             self.blink_status(status="major_err")
             lightsleep(6500)
+            reset()
+            
+        try:
+            if self.rtc_type == "DS3232":
+                self.I2C_0_obj = I2C(0,scl=Pin(5), sda=Pin(4))  # Correct I2C pins for RP2040
+                self.I2C_0_used = True
+                self.rtc = DS3231(self.I2C_0_obj) # for time
+                sleep(0.2)
+                self.rtc.output_32kHz(False)
+            else:
+                self.I2C_0_obj = I2C(0,scl=Pin(5), sda=Pin(4))
+                self.rtc = urtc.PCF8523(self.I2C_0_obj)
+                self.I2C_0_used = True     
+        except Exception as e:
+            print("Error in RTC setup:")
+            print(e)
+            self.blink_status(status="major_err") # Blink to indicate issue to user
+            with open('logs.txt','a') as f:
+                f.write("Error in RTC setup")
+                f.write(str(e))
+                f.write("\n")
+            lightsleep(6500)
+            reset()
+        self.watchdog.feed()
         
         # create the sensor objects
         self.sensor_objs = []
@@ -100,29 +126,9 @@ class datalogger:
                 f.write("Error in SD card setup")
                 f.write(str(e))
                 f.write("\n")
-            lightsleep(8500)
-        try:
-            if self.rtc_type == "DS3232":
-                self.I2C_0_obj = I2C(0,scl=Pin(5), sda=Pin(4))  # Correct I2C pins for RP2040
-                self.I2C_0_used = True
-                self.rtc = DS3231(self.I2C_0_obj) # for time
-                sleep(0.2)
-                self.rtc.output_32kHz(False)
-            else:
-                self.I2C_0_obj = I2C(0,scl=Pin(5), sda=Pin(4))
-                self.rtc = urtc.PCF8523(self.I2C_0_obj)
-                self.i2c_0_used = True     
-        except Exception as e:
-            print("Error in RTC setup:")
-            print(e)
-            self.blink_status(status="major_err") # Blink to indicate issue to user
-            with open('logs.txt','a') as f:
-                f.write("Error in RTC setup")
-                f.write(str(e))
-                f.write("\n")
-            lightsleep(8500)
+            lightsleep(6000)
             reset()
-        self.watchdog.feed()
+        
         
         
         # the sensor objects will output the corresponding columns
@@ -187,13 +193,21 @@ class datalogger:
                 sleep(0.3)
                 self.led.value(0)
         elif status=="major_err":
-            for i in range(0,20):
-                sleep(0.5)
+            for i in range(0,5):
                 self.led.toggle()
-                sleep(2)
+                sleep(0.2)
+                self.led.toggle()
+                sleep(0.2)
+                self.led.toggle()
+                sleep(0.2)
+                self.led.toggle()
+                sleep(0.8)
                 self.led.value(0)
         else:
             return False
+        
+    def reset_datalogger(self, pin):
+        reset()
     
     def read_battery_voltage(self):
         sensor_value = 0
@@ -223,28 +237,28 @@ class datalogger:
         elif sensor_name == "dendro": 
             p = sensor["params"]
             if p["I2C"] == 0:
-                if not self.i2c_0_used:
+                if not self.I2C_0_used:
                     self.I2C_0_obj = I2C(0, sda=Pin(4), scl=Pin(5))
-                    self.i2c_0_used = True
+                    self.I2C_0_used = True
                 return sensor_class.dendrometer(self.I2C_0_obj,on_pins=p["excite"],nb_dendros=p["number"],addr=p["address"], names=p["names"])
             elif p["I2C"] == 1: 
-                if not self.i2c_1_used:
+                if not self.I2C_1_used:
                     self.I2C_1_obj = I2C(1, sda=Pin(2), scl=Pin(3))
-                    self.i2c_1_used = True
+                    self.I2C_1_used = True
                 return sensor_class.dendrometer(self.I2C_1_obj,on_pins=p["excite"],nb_dendros=p["number"],addr=p["address"], names=p["names"])
               
         # !!! SHT45 !!!
         elif sensor_name == "SHT45":
             p = sensor["params"]
             if p["I2C"] == 0:
-                if not self.i2c_0_used:
+                if not self.I2C_0_used:
                     self.I2C_0_obj = I2C(0, sda=Pin(4), scl=Pin(5))
-                    self.i2c_0_used = True
+                    self.I2C_0_used = True
                 return sensor_class.temp_hum_sht45(self.I2C_0_obj, name = p["name"])
             elif p["I2C"] == 1:
-                if not self.i2c_1_used:
+                if not self.I2C_1_used:
                     self.I2C_1_obj = I2C(1, sda=Pin(2), scl=Pin(3))
-                    self.i2c_1_used = True
+                    self.I2C_1_used = True
                 return  sensor_class.temp_hum_sht45(self.I2C_1_obj, name = p["name"])
         
         # !!! TMP1826 temperature sensor !!!
@@ -257,7 +271,7 @@ class datalogger:
         # read the diagnostics
         self.read_battery_voltage()
         self.read_internal_temperature()
-        
+        state = disable_irq()
         vfs.mount(self.filsys, "/sd") # mount the SD card7
         try:
             if self.multi_files:
@@ -314,6 +328,7 @@ class datalogger:
                     f.write("\n")
         finally:
             vfs.umount("/sd") # unmount the SD card
+            enable_irq(state)
         self.watchdog.feed()
     
     def _display_batt(self):
