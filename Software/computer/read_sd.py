@@ -21,3 +21,14 @@ sd = sdcard.SDCard(spi, cs)
 filsys = vfs.VfsFat(sd)
 
 vfs.mount(filsys, "/sd") # mount the SD to make it readable by the connected computer
+
+
+
+
+
+
+
+
+
+
+

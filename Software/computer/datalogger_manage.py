@@ -4,6 +4,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import threading
 import tkinter as tk
 from datetime import datetime
 from pathlib import Path
@@ -13,6 +14,8 @@ import pandas as pd
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 from serial.tools import list_ports  # ships with mpremote (pyserial)
+
+from fast_download import DownloadError, default_data_dir, download_all
 
 # =============================================================================
 # Utility functions
@@ -1176,6 +1179,50 @@ def download_selected_files():
         messagebox.showerror("Download Failed",f"Failed to download {len(failed_files)} file(s):\n"+ "\n".join(failed_files))
 
 
+def download_all_files():
+    """Download every file on the SD card into the 'data' folder (fast path).
+
+    Runs in a background thread so the window stays responsive; all widget
+    updates are handed back to the Tk thread with root.after.
+    """
+    data_dir = default_data_dir()
+    download_all_btn.config(state="disabled")
+    download_progress.config(text="Connecting to device...")
+
+    def progress(idx, count, name, got, size):
+        pct = 100 * got // size if size else 100
+        text = f"File {idx + 1}/{count}: {name} ({pct}%)"
+        root.after(0, lambda: download_progress.config(text=text))
+
+    def finished(files=None, error=None):
+        download_all_btn.config(state="normal")
+        if error:
+            download_progress.config(text="Download failed")
+            print(error)  # full device traceback, for debugging
+            if "No device found" in error:
+                messagebox.showerror("Download Failed", "No device found.")
+            else:
+                # last traceback line, e.g. "OSError: no SD card"
+                messagebox.showerror("Download Failed", error.strip().splitlines()[-1])
+            return
+        total = sum(size for _, size in files)
+        download_progress.config(text=f"{len(files)} file(s), {total / 1024:.0f} KB downloaded")
+        messagebox.showinfo(
+            "Download Complete",
+            f"Downloaded {len(files)} file(s) ({total / 1024:.0f} KB) to:\n{data_dir}",
+        )
+
+    def worker():
+        try:
+            files = download_all(data_dir, remote="/sd", mount_sd=True, progress=progress)
+            root.after(0, lambda: finished(files=files))
+        except (DownloadError, OSError) as e:
+            msg = str(e)
+            root.after(0, lambda: finished(error=msg))
+
+    threading.Thread(target=worker, daemon=True).start()
+
+
 def set_device_time():
     """Set the time on the device."""
     result1 = subprocess.run(
@@ -1410,12 +1457,22 @@ download_btn = ttk.Button(
 )
 download_btn.grid(row=4, column=0, padx=10, pady=5, sticky="ew")
 
+download_all_btn = ttk.Button(
+    right_side,
+    text="Download all",
+    command=download_all_files,
+)
+download_all_btn.grid(row=5, column=0, padx=10, pady=5, sticky="ew")
+
+download_progress = tk.Label(right_side, text="", font=("Arial", 9))
+download_progress.grid(row=6, column=0, padx=10, sticky="ew")
+
 visualise_btn = ttk.Button(
     right_side,
     text="Visualise data",
     command=open_data_visualiser,
 )
-visualise_btn.grid(row=5, column=0, padx=10, pady=5, sticky="ew")
+visualise_btn.grid(row=7, column=0, padx=10, pady=5, sticky="ew")
 
 left_side.grid_columnconfigure(0, weight=1)
 right_side.grid_columnconfigure(0, weight=1)
