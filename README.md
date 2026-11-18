@@ -64,5 +64,8 @@ And then go to the folder containing full_management_gui.py:
 python full_management_gui.py
 ```
 
+### On a smartphone
+An Android app in [Software/smartphone](Software/smartphone) downloads the SD card files to the phone over a USB-OTG cable. It also shows the battery voltage, shows and sets the clock. No computer or mpremote is needed.
+
 ### On the datalogger
 We use two modules. The datalogger module and the sensor module. 
